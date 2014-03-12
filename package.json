@@ -1,0 +1,48 @@
+{
+  "name": "angular-expressions",
+  "version": "0.1.0",
+  "description": "Angular expressions as standalone module",
+  "main": "./lib/main.js",
+  "scripts": {
+    "test": "node node_modules/mocha/bin/mocha test/main.js -R spec",
+    "test-browser": "node node_modules/webpack-dev-server/bin/webpack-dev-server.js mocha\\!./test/main.js -d"
+  },
+  "keywords": [
+    "angular",
+    "expression",
+    "parser",
+    "lexer",
+    "parse",
+    "eval",
+    "source"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "1.x",
+    "chai": "1.x",
+    "sinon": "1.7.x",
+    "sinon-chai": "2.x",
+    "webpack-dev-server": "1.x",
+    "mocha-loader": "0.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peerigon/angular-expressions.git"
+  },
+  "testling": {
+    "harness" : "mocha",
+    "files": "test/main.js",
+    "browsers": [
+      "ie/8..latest",
+      "chrome/27..latest",
+      "firefox/22..latest",
+      "safari/latest",
+      "opera/latest",
+      "iphone/latest",
+      "ipad/latest",
+      "android-browser/latest"
+    ]
+  },
+  "author": "peerigon <developers@peerigon.com>",
+  "license": "Unlicense"
+}
