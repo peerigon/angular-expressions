@@ -200,10 +200,21 @@ describe("expressions", function () {
             });
 
             it("should throw an error if the array doesn't exist", function () {
+                var obj,
+                    err;
+
+                try {
+                    // first we're creating the same type of error because the error messages differ
+                    // between javascript implementations
+                    obj.pirate;
+                } catch (e) {
+                    err = e;
+                }
+
                 evaluate = compile("ships[0].pirate.name = 'Jenny'");
                 expect(function () {
                     evaluate(scope);
-                }).to.throw("Cannot read property 'pirate' of undefined");
+                }).to.throw(err.message);
             });
 
         });
@@ -257,59 +268,59 @@ describe("expressions", function () {
 
             it("should return the expected result when using +", function () {
                 evaluate = compile("1 + 1");
-                expect(evaluate(scope)).to.equal(2);
+                expect(evaluate()).to.equal(2);
             });
 
             it("should return the expected result when using -", function () {
                 evaluate = compile("1 - 1");
-                expect(evaluate(scope)).to.equal(0);
+                expect(evaluate()).to.equal(0);
             });
 
             it("should return the expected result when using *", function () {
                 evaluate = compile("2 * 2");
-                expect(evaluate(scope)).to.equal(4);
+                expect(evaluate()).to.equal(4);
             });
 
             it("should return the expected result when using /", function () {
                 evaluate = compile("4 / 2");
-                expect(evaluate(scope)).to.equal(2);
+                expect(evaluate()).to.equal(2);
             });
 
             it("should return the expected result when using %", function () {
                 evaluate = compile("3 % 2");
-                expect(evaluate(scope)).to.equal(1);
+                expect(evaluate()).to.equal(1);
             });
 
             it("should return the expected result when using &&", function () {
                 evaluate = compile("true && true");
-                expect(evaluate(scope)).to.equal(true);
+                expect(evaluate()).to.equal(true);
                 evaluate = compile("true && false");
-                expect(evaluate(scope)).to.equal(false);
+                expect(evaluate()).to.equal(false);
                 evaluate = compile("false && false");
-                expect(evaluate(scope)).to.equal(false);
+                expect(evaluate()).to.equal(false);
             });
 
             it("should return the expected result when using ||", function () {
                 evaluate = compile("true || true");
-                expect(evaluate(scope)).to.equal(true);
+                expect(evaluate()).to.equal(true);
                 evaluate = compile("true || false");
-                expect(evaluate(scope)).to.equal(true);
+                expect(evaluate()).to.equal(true);
                 evaluate = compile("false || false");
-                expect(evaluate(scope)).to.equal(false);
+                expect(evaluate()).to.equal(false);
             });
 
             it("should return the expected result when using !", function () {
                 evaluate = compile("!true");
-                expect(evaluate(scope)).to.equal(false);
+                expect(evaluate()).to.equal(false);
                 evaluate = compile("!false");
-                expect(evaluate(scope)).to.equal(true);
+                expect(evaluate()).to.equal(true);
             });
 
             /* Ooops, angular doesn't support ++. Maybe someday?
             it("should return the expected result when using ++", function () {
                 scope.value = 2;
                 evaluate = compile("value++");
-                expect(evaluate(scope)).to.equal(3);
+                expect(evaluate()).to.equal(3);
                 expect(scope.value).to.equal(3);
             });*/
 
@@ -317,15 +328,15 @@ describe("expressions", function () {
             it("should return the expected result when using --", function () {
                 scope.value = 2;
                 evaluate = compile("value--");
-                expect(evaluate(scope)).to.equal(1);
+                expect(evaluate()).to.equal(1);
                 expect(scope.value).to.equal(1);
             });*/
 
             it("should return the expected result when using ?", function () {
                 evaluate = compile("true? 'it works' : false");
-                expect(evaluate(scope)).to.equal("it works");
+                expect(evaluate()).to.equal("it works");
                 evaluate = compile("false? false : 'it works'");
-                expect(evaluate(scope)).to.equal("it works");
+                expect(evaluate()).to.equal("it works");
             });
 
         });
