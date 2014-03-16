@@ -373,6 +373,30 @@ describe("expressions", function () {
 
         });
 
+        describe(".cache", function () {
+
+            it("should be an object by default", function () {
+                expect(compile.cache).to.be.an("object");
+            });
+
+            it("should cache the generated function by the expression", function () {
+                var fn = compile("a");
+
+                expect(compile.cache.a).to.equal(fn);
+            });
+
+            describe("when setting it to false", function () {
+
+                it("should disable the cache", function () {
+                    compile.cache = false;
+                    expect(compile("a")).to.not.equal(compile("a"));
+                    compile.cache = {};
+                });
+
+            });
+
+        });
+
     });
 
 });
