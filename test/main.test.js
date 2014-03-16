@@ -349,6 +349,30 @@ describe("expressions", function () {
 
         });
 
+        describe("when evaluating syntactical errors", function () {
+
+            it("should give a readable error message", function () {
+                expect(function () {
+                    compile("'unterminated string");
+                }).to.throw("Lexer Error: Unterminated quote at columns 0-20 ['unterminated string] in expression ['unterminated string].");
+            });
+
+            it("should give a readable error message", function () {
+                expect(function () {
+                    compile("3 = 4");
+                }).to.throw("Token '=' implies assignment but [3 ] can not be assigned to at column 3 of the expression [3 = 4] starting at [= 4].");
+            });
+
+        });
+
+        describe("when evaluating the same expression multiple times", function () {
+
+            it("should cache the generated function", function () {
+                expect(compile("a")).to.equal(compile("a"));
+            });
+
+        });
+
     });
 
 });
