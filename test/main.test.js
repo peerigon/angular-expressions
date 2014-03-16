@@ -7,6 +7,8 @@ var chai = require("chai"),
 
 chai.Assertion.includeStack = true;
 
+// These tests make no claim to be complete. We only test the most important parts of angular expressions.
+// I hope they have their own tests ;)
 describe("expressions", function () {
 
     describe(".Lexer", function () {
@@ -61,6 +63,45 @@ describe("expressions", function () {
             }).to.throw("src must be a string, instead saw 'undefined'");
         });
 
+        describe("when evaluating literals", function () {
+
+            it("should return null", function () {
+                evaluate = compile("null");
+                expect(evaluate(scope)).to.equal(null);
+            });
+
+            it("should return true", function () {
+                evaluate = compile("true");
+                expect(evaluate(scope)).to.equal(true);
+            });
+
+            it("should return false", function () {
+                evaluate = compile("false");
+                expect(evaluate(scope)).to.equal(false);
+            });
+
+            it("should return 2.34e5", function () {
+                evaluate = compile("2.34e5");
+                expect(evaluate(scope)).to.equal(2.34e5);
+            });
+
+            it("should return 'string'", function () {
+                evaluate = compile("'string'");
+                expect(evaluate(scope)).to.equal("string");
+            });
+
+            it("should return [ship, 1, 2, []]", function () {
+                evaluate = compile("[ship, 1, 2, []]");
+                expect(evaluate(scope)).to.eql([scope.ship, 1, 2, []]);
+            });
+
+            it("should return { test: 'value', 'new-object': {} }", function () {
+                evaluate = compile("{ test: 'value', 'new-object': {} }");
+                expect(evaluate(scope)).to.eql({ test: "value", "new-object": {} });
+            });
+
+        });
+
         describe("when evaluating simple key look-ups", function () {
 
             it("should return the value if its defined on scope", function () {
@@ -70,6 +111,11 @@ describe("expressions", function () {
 
             it("should return undefined instead of throwing a ReferenceError if it's not defined on scope", function () {
                 evaluate = compile("notDefined");
+                expect(evaluate(scope)).to.equal(undefined);
+            });
+
+            it("should return undefined even when the 'this' keyword is used", function () {
+                evaluate = compile("this");
                 expect(evaluate(scope)).to.equal(undefined);
             });
 
@@ -183,6 +229,122 @@ describe("expressions", function () {
                     expect(evaluate(scope)).to.equal(scope);
                 });
 
+                it("should call the function on the object where it is defined", function () {
+                    scope.ship.returnThis = function () {
+                        return this;
+                    };
+                    evaluate = compile("ship.returnThis()");
+                    expect(evaluate(scope)).to.equal(scope.ship);
+                });
+
+            });
+
+            describe("using arguments", function () {
+
+                it("should parse the arguments accordingly", function () {
+                     scope.findPirate = function (pirate) {
+                        return Array.prototype.slice.call(arguments);
+                    };
+                    evaluate = compile("findPirate(ship.pirate, 1, [2, 3])");
+                    expect(evaluate(scope)).to.eql([scope.ship.pirate, 1, [2, 3]]);
+                });
+
+            });
+
+        });
+
+        describe("when evaluating operators", function () {
+
+            it("should return the expected result when using +", function () {
+                evaluate = compile("1 + 1");
+                expect(evaluate(scope)).to.equal(2);
+            });
+
+            it("should return the expected result when using -", function () {
+                evaluate = compile("1 - 1");
+                expect(evaluate(scope)).to.equal(0);
+            });
+
+            it("should return the expected result when using *", function () {
+                evaluate = compile("2 * 2");
+                expect(evaluate(scope)).to.equal(4);
+            });
+
+            it("should return the expected result when using /", function () {
+                evaluate = compile("4 / 2");
+                expect(evaluate(scope)).to.equal(2);
+            });
+
+            it("should return the expected result when using %", function () {
+                evaluate = compile("3 % 2");
+                expect(evaluate(scope)).to.equal(1);
+            });
+
+            it("should return the expected result when using &&", function () {
+                evaluate = compile("true && true");
+                expect(evaluate(scope)).to.equal(true);
+                evaluate = compile("true && false");
+                expect(evaluate(scope)).to.equal(false);
+                evaluate = compile("false && false");
+                expect(evaluate(scope)).to.equal(false);
+            });
+
+            it("should return the expected result when using ||", function () {
+                evaluate = compile("true || true");
+                expect(evaluate(scope)).to.equal(true);
+                evaluate = compile("true || false");
+                expect(evaluate(scope)).to.equal(true);
+                evaluate = compile("false || false");
+                expect(evaluate(scope)).to.equal(false);
+            });
+
+            it("should return the expected result when using !", function () {
+                evaluate = compile("!true");
+                expect(evaluate(scope)).to.equal(false);
+                evaluate = compile("!false");
+                expect(evaluate(scope)).to.equal(true);
+            });
+
+            /* Ooops, angular doesn't support ++. Maybe someday?
+            it("should return the expected result when using ++", function () {
+                scope.value = 2;
+                evaluate = compile("value++");
+                expect(evaluate(scope)).to.equal(3);
+                expect(scope.value).to.equal(3);
+            });*/
+
+            /* Ooops, angular doesn't support --. Maybe someday?
+            it("should return the expected result when using --", function () {
+                scope.value = 2;
+                evaluate = compile("value--");
+                expect(evaluate(scope)).to.equal(1);
+                expect(scope.value).to.equal(1);
+            });*/
+
+            it("should return the expected result when using ?", function () {
+                evaluate = compile("true? 'it works' : false");
+                expect(evaluate(scope)).to.equal("it works");
+                evaluate = compile("false? false : 'it works'");
+                expect(evaluate(scope)).to.equal("it works");
+            });
+
+        });
+
+        describe("using complex expressions", function () {
+
+            beforeEach(function () {
+                scope.ships = [
+                    { pirate: function (str) { return str; } },
+                    { pirate: function (str) { return str; } }
+                ];
+                scope.index = 0;
+                scope.pi = "pi";
+                scope.Jenny = "Jenny";
+            });
+
+            it("should still be parseable and executable", function () {
+                evaluate = compile("ships[index][pi + 'rate'](Jenny)");
+                expect(evaluate(scope)).to.equal("Jenny");
             });
 
         });
