@@ -71,7 +71,7 @@ expressions.filters.currency = function (input, currency, digits) {
 expr = expressions.compile("1.2345 | currency:selectedCurrency:2");
 expr({
     selectedCurrency: "EUR"
-}); // returns '1.23'
+}); // returns '1.23€'
 ```
 
 <br />
