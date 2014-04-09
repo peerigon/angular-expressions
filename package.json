@@ -1,6 +1,6 @@
 {
   "name": "angular-expressions",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Angular expressions as standalone module",
   "main": "./lib/main.js",
   "scripts": {
