@@ -41,6 +41,41 @@ console.log(scope.ship.pirate.name); // prints 'Störtebeker'
 
 <br />
 
+Filters
+-------------
+
+Angular provides a mechanism to define filters on expressions:
+
+```javascript
+expressions.filters.uppercase = function (input) {
+    return input.toUpperCase();
+};
+
+expr = expressions.compile("'arr' | uppercase);
+expr(); // returns 'ARR'
+```
+
+Arguments are evaluated against the scope:
+
+```javascript
+expressions.filters.currency = function (input, currency, digits) {
+    input = input.toFixed(digits);
+
+    if (currency === "EUR") {
+        return input + "€";
+    } else {
+        return input + "$";
+    }
+};
+
+expr = expressions.compile("1.2345 | currency:selectedCurrency:2);
+expr({
+    selectedCurrency: "EUR"
+}); // returns '1.23'
+```
+
+<br />
+
 API
 ---
 
@@ -51,6 +86,10 @@ Compiles `src` and returns a function that executes `src` on a `target` object. 
 
 A cache containing all compiled functions. The src is used as key. Set this on `false` to disable the cache.
 
+### .filters: Object
+
+An empty object where you may define your custom filters.
+
 ### .Lexer: Lexer
 
 The internal [Lexer](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19688bb9bbe504c300e61776dc/src/ng/parse.js#L116).
@@ -58,6 +97,7 @@ The internal [Lexer](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19
 ### .Parser: Parser
 
 The internal [Parser](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19688bb9bbe504c300e61776dc/src/ng/parse.js#L390).
+
 
 <br />
 

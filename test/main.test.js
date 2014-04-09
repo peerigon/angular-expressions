@@ -5,7 +5,7 @@ var chai = require("chai"),
     expressions = require("../lib/main.js"),
     compile = expressions.compile;
 
-chai.Assertion.includeStack = true;
+chai.config.includeStack = true;
 
 // These tests make no claim to be complete. We only test the most important parts of angular expressions.
 // I hope they have their own tests ;)
@@ -376,6 +376,27 @@ describe("expressions", function () {
 
         });
 
+        describe("when using filters", function () {
+
+            it("should apply the given filter", function () {
+                expressions.filters.currency = function (input, currency, digits) {
+                    input = input.toFixed(digits);
+
+                    if (currency === "EUR") {
+                        return input + "€";
+                    } else {
+                        return input + "$";
+                    }
+                };
+
+                evaluate = compile("1.2345 | currency:selectedCurrency:2");
+                expect(evaluate({
+                    selectedCurrency: "EUR"
+                })).to.equal("1.23€");
+            });
+
+        });
+
         describe("when evaluating the same expression multiple times", function () {
 
             it("should cache the generated function", function () {
@@ -406,6 +427,14 @@ describe("expressions", function () {
 
             });
 
+        });
+
+    });
+
+    describe(".filters", function () {
+
+        it("should be an object", function () {
+            expect(expressions.filters).to.be.an("object");
         });
 
     });
