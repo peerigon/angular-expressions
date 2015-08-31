@@ -199,24 +199,6 @@ describe("expressions", function () {
                 expect(scope.ships[0].pirate).to.equal("Störtebeker");
             });
 
-            it("should throw an error if the array doesn't exist", function () {
-                var obj,
-                    err;
-
-                try {
-                    // first we're creating the same type of error because the error messages differ
-                    // between javascript implementations
-                    obj.pirate;
-                } catch (e) {
-                    err = e;
-                }
-
-                evaluate = compile("ships[0].pirate.name = 'Jenny'");
-                expect(function () {
-                    evaluate(scope);
-                }).to.throw(err.message);
-            });
-
         });
 
         describe("when evaluating function calls", function () {
@@ -425,6 +407,34 @@ describe("expressions", function () {
                     compile.cache = {};
                 });
 
+            });
+
+        });
+
+        describe("assignable", function() {
+
+            it("should expose assignment function", function() {
+                var fn = compile("a");
+                expect(fn.assign).to.be.a("function");
+                var scope = {};
+                fn.assign(scope, 123);
+                expect(scope.a).to.equal(123);
+            });
+
+            it('should expose working assignment function for expressions ending with brackets', function() {
+                var fn = compile('a.b["c"]');
+                expect(fn.assign).to.be.a("function");
+                var scope = {};
+                fn.assign(scope, 123);
+                expect(scope.a.b.c).to.equal(123);
+            });
+
+            it('should expose working assignment function for expressions with brackets in the middle', function() {
+                var fn = compile('a["b"].c');
+                expect(fn.assign).to.be.a("function");
+                var scope = {};
+                fn.assign(scope, 123);
+                expect(scope.a.b.c).to.equal(123);
             });
 
         });
