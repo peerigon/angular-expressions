@@ -21,7 +21,7 @@
     "mocha": "1.x",
     "chai": "1.x",
     "webpack-dev-server": "1.x",
-    "mocha-loader": "0.x"
+    "mocha-loader": "0.6.4"
   },
   "repository": {
     "type": "git",
