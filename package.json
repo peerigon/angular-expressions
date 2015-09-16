@@ -18,17 +18,17 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "mocha": "1.x",
-    "chai": "1.x",
-    "webpack-dev-server": "1.x",
-    "mocha-loader": "0.6.4"
+    "chai": "^3.2.0",
+    "mocha": "^2.3.2",
+    "mocha-loader": "^0.7.1",
+    "webpack-dev-server": "^1.11.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/peerigon/angular-expressions.git"
   },
   "testling": {
-    "harness" : "mocha",
+    "harness": "mocha",
     "files": "test/main.js",
     "browsers": [
       "ie/8..latest",
