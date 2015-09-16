@@ -3,6 +3,8 @@ angular-expressions
 
 **[angular's nicest part](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19688bb9bbe504c300e61776dc/src/ng/parse.js) extracted as a standalone module for the browser and node.**
 
+[![build status](https://travis-ci.org/peerigon/angular-expressions.svg)](http://travis-ci.org/peerigon/angular-expressions)
+
 **angular-expressions** exposes a `.compile()`-method which can be used to compile evaluable expressions:
 
 ```javascript
@@ -39,12 +41,7 @@ Check out [their readme](http://docs.angularjs.org/guide/expression) for further
 Setup
 -----
 
-[![npm status](https://nodei.co/npm/angular-expressions.png?downloads=true&stars=true)](https://npmjs.org/package/angular-expressions)
-
-[![build status](https://travis-ci.org/peerigon/angular-expressions.png)](http://travis-ci.org/peerigon/angular-expressions)
-
-[![browser support](https://ci.testling.com/peerigon/angular-expressions.png)
-](https://ci.testling.com/peerigon/angular-expressions)
+[![npm status](https://nodei.co/npm/angular-expressions.svg?downloads=true&stars=true&downloadRank=true)](https://npmjs.org/package/angular-expressions)
 
 
 <br />
