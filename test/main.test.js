@@ -1,9 +1,9 @@
 "use strict";
 
-var chai = require("chai"),
-    expect = chai.expect,
-    expressions = require("../lib/main.js"),
-    compile = expressions.compile;
+var chai = require("chai");
+var expect = chai.expect;
+var expressions = require("../lib/main.js");
+var compile = expressions.compile;
 
 chai.config.includeStack = true;
 
@@ -40,8 +40,8 @@ describe("expressions", function () {
     });
 
     describe(".compile(src)", function () {
-        var scope,
-            evaluate;
+        var scope;
+        var evaluate;
 
         beforeEach(function () {
             scope = {
@@ -387,6 +387,36 @@ describe("expressions", function () {
 
         });
 
+        describe("for assigning values", function() {
+
+            beforeEach(function () {
+                scope = {};
+            });
+
+            it("should expose an 'assign'-function", function() {
+                var fn = compile("a");
+
+                expect(fn.assign).to.be.a("function");
+                fn.assign(scope, 123);
+                expect(scope.a).to.equal(123);
+            });
+
+            it("should expose working assignment function for expressions ending with brackets", function() {
+                var fn = compile("a.b['c']");
+
+                fn.assign(scope, 123);
+                expect(scope.a.b.c).to.equal(123);
+            });
+
+            it("should expose working assignment function for expressions with brackets in the middle", function() {
+                var fn = compile("a[\"b\"].c");
+
+                fn.assign(scope, 123);
+                expect(scope.a.b.c).to.equal(123);
+            });
+
+        });
+
         describe(".cache", function () {
 
             it("should be an object by default", function () {
@@ -407,34 +437,6 @@ describe("expressions", function () {
                     compile.cache = {};
                 });
 
-            });
-
-        });
-
-        describe("assignable", function() {
-
-            it("should expose assignment function", function() {
-                var fn = compile("a");
-                expect(fn.assign).to.be.a("function");
-                var scope = {};
-                fn.assign(scope, 123);
-                expect(scope.a).to.equal(123);
-            });
-
-            it('should expose working assignment function for expressions ending with brackets', function() {
-                var fn = compile('a.b["c"]');
-                expect(fn.assign).to.be.a("function");
-                var scope = {};
-                fn.assign(scope, 123);
-                expect(scope.a.b.c).to.equal(123);
-            });
-
-            it('should expose working assignment function for expressions with brackets in the middle', function() {
-                var fn = compile('a["b"].c');
-                expect(fn.assign).to.be.a("function");
-                var scope = {};
-                fn.assign(scope, 123);
-                expect(scope.a.b.c).to.equal(123);
             });
 
         });
