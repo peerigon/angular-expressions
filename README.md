@@ -1,7 +1,38 @@
 angular-expressions
 ===================
 
-[angular's expressions](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19688bb9bbe504c300e61776dc/src/ng/parse.js) extracted as a standalone module for the browser and node. Check out [their readme](http://docs.angularjs.org/guide/expression) for further information.
+**[angular's nicest part](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19688bb9bbe504c300e61776dc/src/ng/parse.js) extracted as a standalone module for the browser and node.**
+
+**angular-expressions** exposes a `.compile()`-method which can be used to compile evaluable expressions:
+
+```javascript
+var expressions = require("angular-expressions");
+
+evaluate = expressions.compile("1 + 1");
+evaluate(); // returns 2
+```
+
+You can also set and get values on a given `scope`:
+
+```javascript
+evaluate = expressions.compile("name");
+scope = { name: "Jenny" };
+evaluate(scope); // returns 'Jenny'
+
+evaluate = expressions.compile("ship.pirate.name = 'Störtebeker'");
+evaluate(scope); // won't throw an error because angular's expressions are forgiving
+console.log(scope.ship.pirate.name); // prints 'Störtebeker'
+```
+
+For assigning values, you can also use `.assign()`:
+
+```javascript
+evaluate = expressions.compile("ship.pirate.name");
+evaluate(scope, "Störtebeker");
+console.log(scope.ship.pirate.name); // prints 'Störtebeker'
+```
+
+Check out [their readme](http://docs.angularjs.org/guide/expression) for further information.
 
 <br />
 
@@ -15,41 +46,16 @@ Setup
 [![browser support](https://ci.testling.com/peerigon/angular-expressions.png)
 ](https://ci.testling.com/peerigon/angular-expressions)
 
-<br />
-
-Usage
------
-
-```javascript
-var expressions = require("angular-expressions"),
-    scope,
-    expr;
-
-expr = expressions.compile("1 + 1");
-expr(); // returns 2
-
-expr = expressions.compile("name");
-scope = { name: 'Jenny' };
-expr(scope); // returns 'Jenny'
-
-expr = expressions.compile("ship.pirate.name = 'Störtebeker'");
-scope = {};
-expr(scope); // won't throw an error because angular's expressions are forgiving
-
-console.log(scope.ship.pirate.name); // prints 'Störtebeker'
-```
 
 <br />
 
 Filters
--------------
+-------
 
 Angular provides a mechanism to define filters on expressions:
 
 ```javascript
-expressions.filters.uppercase = function (input) {
-    return input.toUpperCase();
-};
+expressions.filters.uppercase = input => input.toUpperCase();
 
 expr = expressions.compile("'arr' | uppercase");
 expr(); // returns 'ARR'
@@ -58,7 +64,7 @@ expr(); // returns 'ARR'
 Arguments are evaluated against the scope:
 
 ```javascript
-expressions.filters.currency = function (input, currency, digits) {
+expressions.filters.currency = (input, currency, digits) => {
     input = input.toFixed(digits);
 
     if (currency === "EUR") {
@@ -77,32 +83,44 @@ expr({
 <br />
 
 API
----
+----
 
-### .compile(src: String): Function&lt;target?&gt;
-Compiles `src` and returns a function that executes `src` on a `target` object. The compiled function is cached under `compile.cache[src]` to speed up further calls.
+### exports
 
-### .compile.cache: Object|Boolean
+#### .compile(src): Function
+
+Compiles `src` and returns a function `evaluate()`. The compiled function is cached under `compile.cache[src]` to speed up further calls.
+
+#### .compile.cache = {}
 
 A cache containing all compiled functions. The src is used as key. Set this on `false` to disable the cache.
 
-### .filters: Object
+#### .filters = {}
 
 An empty object where you may define your custom filters.
 
-### .Lexer: Lexer
+#### .Lexer
 
 The internal [Lexer](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19688bb9bbe504c300e61776dc/src/ng/parse.js#L116).
 
-### .Parser: Parser
+#### .Parser
 
 The internal [Parser](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19688bb9bbe504c300e61776dc/src/ng/parse.js#L390).
 
+----
+
+### evaluate(scope?): *
+
+Evaluates the compiled `src` and returns the result of the expression. Property look-ups or assignments are executed on a given `scope`.
+
+### evaluate.assign(scope, value): *
+
+Tries to assign the given `value` to the result of the compiled expression on the given `scope` and returns the result of the assignment.
 
 <br />
 
 In the browser
--------------
+--------------
 
 There is no `dist` build because it's not 2005 anymore. Use a module bundler like [webpack](http://webpack.github.io/) or [browserify](http://browserify.org/). They're both capable of CommonJS and AMD.
 
