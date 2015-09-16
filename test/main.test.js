@@ -401,18 +401,35 @@ describe("expressions", function () {
                 expect(scope.a).to.equal(123);
             });
 
-            it("should expose working assignment function for expressions ending with brackets", function() {
-                var fn = compile("a.b['c']");
+            describe("the 'assign'-function", function () {
 
-                fn.assign(scope, 123);
-                expect(scope.a.b.c).to.equal(123);
-            });
+                it("should work for expressions ending with brackets", function() {
+                    var fn = compile("a.b['c']");
 
-            it("should expose working assignment function for expressions with brackets in the middle", function() {
-                var fn = compile("a[\"b\"].c");
+                    fn.assign(scope, 123);
+                    expect(scope.a.b.c).to.equal(123);
+                });
 
-                fn.assign(scope, 123);
-                expect(scope.a.b.c).to.equal(123);
+                it("should work for expressions with brackets in the middle", function() {
+                    var fn = compile("a[\"b\"].c");
+
+                    fn.assign(scope, 123);
+                    expect(scope.a.b.c).to.equal(123);
+                });
+
+                it("should work for expressions with brackets in the middle", function() {
+                    var fn = compile("a[\"b\"].c");
+
+                    fn.assign(scope, 123);
+                    expect(scope.a.b.c).to.equal(123);
+                });
+
+                it("should return the result of the assignment", function () {
+                    var fn = compile("a[\"b\"].c");
+
+                    expect(fn.assign(scope, 123)).to.equal(123);
+                });
+
             });
 
         });
