@@ -30,7 +30,7 @@ For assigning values, you can also use `.assign()`:
 
 ```javascript
 evaluate = expressions.compile("ship.pirate.name");
-evaluate(scope, "Störtebeker");
+evaluate.assign(scope, "Störtebeker");
 console.log(scope.ship.pirate.name); // prints 'Störtebeker'
 ```
 
