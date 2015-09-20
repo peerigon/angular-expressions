@@ -235,7 +235,7 @@ describe("expressions", function () {
             describe("using arguments", function () {
 
                 it("should parse the arguments accordingly", function () {
-                     scope.findPirate = function (pirate) {
+                    scope.findPirate = function (pirate) {
                         return Array.prototype.slice.call(arguments);
                     };
                     evaluate = compile("findPirate(ship.pirate, 1, [2, 3])");
@@ -366,9 +366,8 @@ describe("expressions", function () {
 
                     if (currency === "EUR") {
                         return input + "€";
-                    } else {
-                        return input + "$";
                     }
+                    return input + "$";
                 };
 
                 evaluate = compile("1.2345 | currency:selectedCurrency:2");
@@ -387,13 +386,13 @@ describe("expressions", function () {
 
         });
 
-        describe("for assigning values", function() {
+        describe("for assigning values", function () {
 
             beforeEach(function () {
                 scope = {};
             });
 
-            it("should expose an 'assign'-function", function() {
+            it("should expose an 'assign'-function", function () {
                 var fn = compile("a");
 
                 expect(fn.assign).to.be.a("function");
@@ -403,21 +402,21 @@ describe("expressions", function () {
 
             describe("the 'assign'-function", function () {
 
-                it("should work for expressions ending with brackets", function() {
+                it("should work for expressions ending with brackets", function () {
                     var fn = compile("a.b['c']");
 
                     fn.assign(scope, 123);
                     expect(scope.a.b.c).to.equal(123);
                 });
 
-                it("should work for expressions with brackets in the middle", function() {
+                it("should work for expressions with brackets in the middle", function () {
                     var fn = compile("a[\"b\"].c");
 
                     fn.assign(scope, 123);
                     expect(scope.a.b.c).to.equal(123);
                 });
 
-                it("should work for expressions with brackets in the middle", function() {
+                it("should work for expressions with brackets in the middle", function () {
                     var fn = compile("a[\"b\"].c");
 
                     fn.assign(scope, 123);

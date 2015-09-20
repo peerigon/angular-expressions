@@ -5,7 +5,8 @@
   "main": "./lib/main.js",
   "scripts": {
     "test": "node node_modules/mocha/bin/mocha test/main.test.js -R spec",
-    "test-browser": "node node_modules/webpack-dev-server/bin/webpack-dev-server.js mocha\\!./test/main.test.js -d"
+    "test-browser": "node node_modules/webpack-dev-server/bin/webpack-dev-server.js mocha\\!./test/main.test.js -d",
+    "posttest": "eslint --fix lib test"
   },
   "keywords": [
     "angular",
@@ -19,6 +20,8 @@
   "dependencies": {},
   "devDependencies": {
     "chai": "^3.2.0",
+    "eslint": "^1.5.0",
+    "eslint-config-peerigon": "^0.0.1",
     "mocha": "^2.3.2",
     "mocha-loader": "^0.7.1",
     "webpack-dev-server": "^1.11.0"

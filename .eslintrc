@@ -1,0 +1,4 @@
+{
+    "extends": "peerigon/es5",
+    "root": true
+}
