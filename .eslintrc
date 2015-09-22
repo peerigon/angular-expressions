@@ -1,4 +1,8 @@
 {
     "extends": "peerigon/es5",
-    "root": true
+    "root": true,
+    "env": {
+        "node": true,
+        "browser": true
+    }
 }
