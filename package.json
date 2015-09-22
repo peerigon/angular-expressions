@@ -4,8 +4,8 @@
   "description": "Angular expressions as standalone module",
   "main": "./lib/main.js",
   "scripts": {
-    "test": "node node_modules/mocha/bin/mocha test/main.test.js -R spec",
-    "test-browser": "node node_modules/webpack-dev-server/bin/webpack-dev-server.js mocha\\!./test/main.test.js -d",
+    "test": "mocha test/main.test.js -R spec",
+    "test-browser": "webpack-dev-server mocha\\!./test/main.test.js -d",
     "posttest": "eslint --fix lib test"
   },
   "keywords": [
