@@ -88,6 +88,24 @@ API
 
 Compiles `src` and returns a function `evaluate()`. The compiled function is cached under `compile.cache[src]` to speed up further calls.
 
+Compiles also export the AST.
+
+Example output of: `compile("tmp + 1").ast`
+
+```
+{ type: 'Program',
+  body:
+   [ { type: 'ExpressionStatement',
+       expression:
+        { type: 'Identifier',
+          name: 'tmp',
+          constant: false,
+          toWatch: [ [Circular] ] } } ],
+  constant: false }
+```
+
+*NOTE* angular $parse do not export ast variable it's done by this library.
+
 #### .compile.cache = {}
 
 A cache containing all compiled functions. The src is used as key. Set this on `false` to disable the cache.

@@ -32,7 +32,7 @@ describe("expressions", function () {
         });
 
         it("should provide a .parse()-method", function () {
-            var parser = new expressions.Parser();
+            var parser = new expressions.Parser(undefined, undefined, {});
 
             expect(parser.parse).to.be.a("function");
         });
@@ -61,6 +61,10 @@ describe("expressions", function () {
             expect(function () {
                 compile();
             }).to.throw("src must be a string, instead saw 'undefined'");
+        });
+
+        it("should expose the ast", function () {
+            expect(compile("tmp").ast).to.be.a("object");
         });
 
         describe("when evaluating literals", function () {
@@ -114,9 +118,9 @@ describe("expressions", function () {
                 expect(evaluate(scope)).to.equal(undefined);
             });
 
-            it("should return undefined even when the 'this' keyword is used", function () {
+            it("should return the scope even when the 'this' keyword is used", function () {
                 evaluate = compile("this");
-                expect(evaluate(scope)).to.equal(undefined);
+                expect(evaluate(scope)).to.equal(scope);
             });
 
         });
@@ -353,7 +357,7 @@ describe("expressions", function () {
             it("should give a readable error message", function () {
                 expect(function () {
                     compile("3 = 4");
-                }).to.throw("Token '=' implies assignment but [3 ] can not be assigned to at column 3 of the expression [3 = 4] starting at [= 4].");
+                }).to.throw("[$parse:lval] Trying to assign a value to a non l-value\nhttp://errors.angularjs.org/\"NG_VERSION_FULL\"/$parse/lval");
             });
 
         });
