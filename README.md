@@ -180,6 +180,7 @@ window or some DOM object that has a reference to window is published onto a Sco
 
 <br />
 
+
 Authorship
 ----------
 Kudos go entirely to the great angular.js team, it's their implementation!
@@ -201,3 +202,8 @@ License
 -------
 
 [Unlicense](http://unlicense.org/)
+
+Sponsors
+-------
+
+[<img src="https://assets.peerigon.com/peerigon/logo/peerigon-logo-flat-spinat.png" width="150" />](https://peerigon.com)
