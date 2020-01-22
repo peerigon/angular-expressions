@@ -24,7 +24,7 @@
     "eslint-config-peerigon": "^0.1.0",
     "mocha": "^2.3.2",
     "mocha-loader": "^0.7.1",
-    "webpack-dev-server": "^1.11.0"
+    "webpack-dev-server": "^3.10.1"
   },
   "repository": {
     "type": "git",
