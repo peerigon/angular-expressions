@@ -5,8 +5,8 @@
   "main": "./lib/main.js",
   "scripts": {
     "test": "mocha test/main.test.js -R spec",
-    "test-browser": "webpack-dev-server mocha\\!./test/main.test.js -d",
-    "posttest": "eslint --fix lib test"
+    "test-browser": "webpack-dev-server 'mocha-loader!./test/main.test.js' --output-filename output.js --port 8081",
+    "posttest": "eslint --fix lib test && prettier --write lib/*.js test/*.js"
   },
   "keywords": [
     "angular",
@@ -20,11 +20,13 @@
   "dependencies": {},
   "devDependencies": {
     "chai": "^3.2.0",
-    "eslint": "^1.5.0",
-    "eslint-config-peerigon": "^0.1.0",
-    "mocha": "^2.3.2",
-    "mocha-loader": "^0.7.1",
-    "webpack-dev-server": "^1.11.0"
+    "eslint": "^5.16.0",
+    "mocha": "^7.0.0",
+    "mocha-loader": "^4.0.1",
+    "prettier": "^1.19.1",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.10.1"
   },
   "repository": {
     "type": "git",

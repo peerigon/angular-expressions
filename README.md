@@ -1,5 +1,6 @@
-angular-expressions
-===================
+**A security vulnerability has been found that affects all versions before 1.0.1. Please read this advisory https://github.com/peerigon/angular-expressions/security/advisories/GHSA-hxhm-96pp-2m43 for more information.**
+
+# angular-expressions
 
 **[angular's nicest part](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19688bb9bbe504c300e61776dc/src/ng/parse.js) extracted as a standalone module for the browser and node.**
 
@@ -38,16 +39,13 @@ Check out [their readme](http://docs.angularjs.org/guide/expression) for further
 
 <br />
 
-Setup
------
+## Setup
 
 [![npm status](https://nodei.co/npm/angular-expressions.svg?downloads=true&stars=true&downloadRank=true)](https://npmjs.org/package/angular-expressions)
 
-
 <br />
 
-Filters
--------
+## Filters
 
 Angular provides a mechanism to define filters on expressions:
 
@@ -62,25 +60,24 @@ Arguments are evaluated against the scope:
 
 ```javascript
 expressions.filters.currency = (input, currency, digits) => {
-    input = input.toFixed(digits);
+  input = input.toFixed(digits);
 
-    if (currency === "EUR") {
-        return input + "€";
-    } else {
-        return input + "$";
-    }
+  if (currency === "EUR") {
+    return input + "€";
+  } else {
+    return input + "$";
+  }
 };
 
 expr = expressions.compile("1.2345 | currency:selectedCurrency:2");
 expr({
-    selectedCurrency: "EUR"
+  selectedCurrency: "EUR"
 }); // returns '1.23€'
 ```
 
 <br />
 
-API
-----
+## API
 
 ### exports
 
@@ -104,9 +101,9 @@ Example output of: `compile("tmp + 1").ast`
   constant: false }
 ```
 
-*NOTE* angular $parse do not export ast variable it's done by this library.
+_NOTE_ angular \$parse do not export ast variable it's done by this library.
 
-#### .compile.cache = {}
+#### .compile.cache = Object.create(null)
 
 A cache containing all compiled functions. The src is used as key. Set this on `false` to disable the cache.
 
@@ -122,34 +119,34 @@ The internal [Lexer](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19
 
 The internal [Parser](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19688bb9bbe504c300e61776dc/src/ng/parse.js#L390).
 
-----
+---
 
-### evaluate(scope?): *
+### evaluate(scope?): \*
 
 Evaluates the compiled `src` and returns the result of the expression. Property look-ups or assignments are executed on a given `scope`.
 
-### evaluate.assign(scope, value): *
+### evaluate.assign(scope, value): \*
 
 Tries to assign the given `value` to the result of the compiled expression on the given `scope` and returns the result of the assignment.
 
 <br />
 
-In the browser
---------------
+## In the browser
 
 There is no `dist` build because it's not 2005 anymore. Use a module bundler like [webpack](http://webpack.github.io/) or [browserify](http://browserify.org/). They're both capable of CommonJS and AMD.
 
 <br />
 
-Security
---------
+## Security
+
+The code of angular was not secured from reading prototype, and since version 1.0.1 of angular-expressions, the module disallows reading properties that are not ownProperties. See [this blog post](http://blog.angularjs.org/2016/09/angular-16-expression-sandbox-removal.html) for more details about the sandbox that got removed completely in angular 1.6.
 
 Comment from `angular.js/src/ng/parse.js`:
 
 ---
 
 Angular expressions are generally considered safe because these expressions only have direct
-access to $scope and locals. However, one can obtain the ability to execute arbitrary JS code by
+access to \$scope and locals. However, one can obtain the ability to execute arbitrary JS code by
 obtaining a reference to native JS functions such as the Function constructor.
 
 As an example, consider the following Angular expression:
@@ -180,16 +177,13 @@ window or some DOM object that has a reference to window is published onto a Sco
 
 <br />
 
+## Authorship
 
-Authorship
-----------
 Kudos go entirely to the great angular.js team, it's their implementation!
-
 
 <br />
 
-Contributing
-------------
+## Contributing
 
 Suggestions and bug-fixes are always appreciated. Don't hesitate to create an issue or pull-request. All contributed code should pass
 
@@ -198,12 +192,10 @@ Suggestions and bug-fixes are always appreciated. Don't hesitate to create an is
 
 <br />
 
-License
--------
+## License
 
 [Unlicense](http://unlicense.org/)
 
-Sponsors
--------
+## Sponsors
 
 [<img src="https://assets.peerigon.com/peerigon/logo/peerigon-logo-flat-spinat.png" width="150" />](https://peerigon.com)
