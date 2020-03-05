@@ -437,6 +437,27 @@ describe("expressions", function() {
 		});
 	});
 
+	describe("Special characters", function() {
+		var evaluate;
+		it("should allow to define isIdentifierStart and isIdentifierContinue", function() {
+			function validChars(ch) {
+				return (
+					(ch >= "a" && ch <= "z") ||
+					(ch >= "A" && ch <= "Z") ||
+					ch === "_" ||
+					ch === "$" ||
+					"ÀÈÌÒÙàèìòùÁÉÍÓÚáéíóúÂÊÎÔÛâêîôûÃÑÕãñõÄËÏÖÜŸäëïöüÿß".indexOf(ch) !== -1
+				);
+			}
+			evaluate = compile("être_embarassé", {
+				isIdentifierStart: validChars,
+				isIdentifierContinue: validChars
+			});
+
+			expect(evaluate({ être_embarassé: "Ping" })).to.eql("Ping");
+		});
+	});
+
 	describe("prototype", function() {
 		var evaluate;
 
