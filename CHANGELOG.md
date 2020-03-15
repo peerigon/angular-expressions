@@ -1,3 +1,7 @@
+### 1.1.1
+
+Previous version was published with ES6 feature, now the published JS uses ES5 only
+
 ### 1.1.0
 
 - Add support for special characters by using the following :
