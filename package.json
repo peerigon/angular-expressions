@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha test/main.test.js -R spec",
     "test-browser": "webpack-dev-server 'mocha-loader!./test/main.test.js' --output-filename output.js --port 8081",
-    "posttest": "eslint --fix lib test && prettier --write lib/*.js test/*.js"
+    "lint": "eslint lib test && prettier lib/*.js test/*.js --list-different",
+    "lint:fix": "eslint --fix lib test && prettier --write lib/*.js test/*.js"
   },
   "keywords": [
     "angular",

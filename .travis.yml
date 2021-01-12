@@ -1,9 +1,20 @@
 language: node_js
-node_js:
-  - "8"
-  - "10"
-  - "12"
-  - "13"
-
+dist: xenial
+jobs:
+  include:
+  - node_js: stable
+    env: COMMAND=lint
+  - node_js: '8'
+    env: COMMAND=test
+  - node_js: '10'
+    env: COMMAND=test
+  - node_js: '11'
+    env: COMMAND=test
+  - node_js: '12'
+    env: COMMAND=test
+  - node_js: '13'
+    env: COMMAND=test
+  - node_js: '14'
+    env: COMMAND=test
 script:
-  - npm test
+- npm run "$COMMAND"
