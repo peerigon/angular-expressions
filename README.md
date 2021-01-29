@@ -1,4 +1,4 @@
-**A security vulnerability has been found that affects all versions before 1.0.1. Please read this advisory https://github.com/peerigon/angular-expressions/security/advisories/GHSA-hxhm-96pp-2m43 for more information.**
+**A security vulnerability has been found that affects all versions before 1.1.2. Please read this advisory https://github.com/peerigon/angular-expressions/security/advisories/GHSA-j6px-jwvv-vpwq for more information.**
 
 # angular-expressions
 
@@ -50,7 +50,7 @@ Check out [their readme](http://docs.angularjs.org/guide/expression) for further
 Angular provides a mechanism to define filters on expressions:
 
 ```javascript
-expressions.filters.uppercase = input => input.toUpperCase();
+expressions.filters.uppercase = (input) => input.toUpperCase();
 
 expr = expressions.compile("'arr' | uppercase");
 expr(); // returns 'ARR'
@@ -71,7 +71,7 @@ expressions.filters.currency = (input, currency, digits) => {
 
 expr = expressions.compile("1.2345 | currency:selectedCurrency:2");
 expr({
-  selectedCurrency: "EUR"
+  selectedCurrency: "EUR",
 }); // returns '1.23€'
 ```
 
