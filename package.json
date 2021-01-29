@@ -4,6 +4,7 @@
   "description": "Angular expressions as standalone module",
   "main": "./lib/main.js",
   "scripts": {
+    "preversion": "npm run lint && npm run test",
     "test": "mocha test/main.test.js -R spec",
     "test-browser": "webpack-dev-server 'mocha-loader!./test/main.test.js' --output-filename output.js --port 8081",
     "lint": "eslint lib test && prettier lib/*.js test/*.js --list-different",
