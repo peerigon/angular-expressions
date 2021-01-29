@@ -152,6 +152,32 @@ describe("expressions", function () {
 			});
 		});
 
+		describe("Security", function () {
+			it("should not leak", function () {
+				evaluate = compile(
+					"''['c'+'onstructor']['c'+'onstructor']('return process;')()"
+				);
+				const result = evaluate({});
+				expect(result).to.equal(undefined);
+			});
+
+			it("should not leak indirectly with string concatenation", function () {
+				evaluate = compile(
+					"a = null; a = ''['c'+'onstructor']['c'+'onstructor']; a = a('return process;'); a();"
+				);
+				const result = evaluate({});
+				expect(result).to.equal(undefined);
+			});
+
+			it("should not leak indirectly with literal string", function () {
+				evaluate = compile(
+					"a = null; a = ''['constructor']['constructor']; a = a('return process;'); a();"
+				);
+				const result = evaluate({});
+				expect(result).to.equal(undefined);
+			});
+		});
+
 		describe("when evaluating dot-notated assignments", function () {
 			it("should set the new value on scope", function () {
 				evaluate = compile("island.pirate.name = 'Störtebeker'");
@@ -468,7 +494,7 @@ describe("expressions", function () {
 
 		it("should not leak with computed prop", function () {
 			evaluate = compile("a['split']");
-			expect(evaluate({ a: "" })).to.eql(undefined);
+			expect(evaluate({ a: "" })).to.eql(null);
 		});
 
 		it("should allow to read string length", function () {
@@ -487,8 +513,7 @@ describe("expressions", function () {
 		// 	evaluate(scope);
 		// 	expect(scope.name.split).to.be.a("function");
 		// });
-		//
-		//
+
 		it("should work with __proto__", function () {
 			evaluate = compile("__proto__");
 			expect(evaluate({})).to.eql(undefined);

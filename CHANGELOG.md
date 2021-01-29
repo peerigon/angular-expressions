@@ -1,3 +1,7 @@
+### 1.1.2
+
+- Disallow access to prototype chain (CVE-2021-21277)
+
 ### 1.1.1
 
 Previous version was published with ES6 feature, now the published JS uses ES5 only
@@ -18,7 +22,7 @@ function validChars(ch) {
 }
 evaluate = compile("être_embarassé", {
   isIdentifierStart: validChars,
-  isIdentifierContinue: validChars
+  isIdentifierContinue: validChars,
 });
 
 evaluate({ être_embarassé: "Ping" });
