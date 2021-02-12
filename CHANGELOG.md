@@ -1,3 +1,7 @@
+### 1.1.3
+
+Bugfix : Make module ES5 compatible (to work in IE10 for example), by using var instead of const
+
 ### 1.1.2
 
 - Disallow access to prototype chain (CVE-2021-21277)
