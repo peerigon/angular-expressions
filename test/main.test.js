@@ -186,9 +186,21 @@ describe("expressions", function () {
 			});
 
 			it("should change the value if its defined on scope", function () {
+				expect(scope.ship.pirate.name).to.equal("Jenny");
 				evaluate = compile("ship.pirate.name = 'Störtebeker'");
 				evaluate(scope);
 				expect(scope.ship.pirate.name).to.equal("Störtebeker");
+			});
+
+			it("should change the value in the scope if its defined both in scope and in locals", function () {
+				const scope = { a: 10, b: 5 };
+				evaluate = compile("b = a");
+				const context = { b: 2 };
+				evaluate(scope, context);
+				expect(context.b).to.equal(2);
+				expect(scope.b).to.equal(10);
+				const res = compile("b")(scope);
+				expect(res).to.equal(10);
 			});
 		});
 

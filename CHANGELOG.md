@@ -1,3 +1,19 @@
+### 1.1.4
+
+Bugfix : When using an assignment expression, such as `b = a`, the value will always be set in the scope, not in the locals.
+
+With this code :
+
+```js
+const scope = { a: 10 };
+const locals = { b: 5 };
+compile("b=a")(scope, locals);
+```
+
+The scope value will be `{ a: 10, b: 10 }` after the evaluation.
+
+In previous versions, the value would be assigned to the locals, meaning locals would be `{ b: 10 }`
+
 ### 1.1.3
 
 Bugfix : Make module ES5 compatible (to work in IE10 for example), by using var instead of const
