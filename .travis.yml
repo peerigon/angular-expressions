@@ -4,17 +4,11 @@ jobs:
   include:
   - node_js: stable
     env: COMMAND=lint
-  - node_js: '8'
-    env: COMMAND=test
-  - node_js: '10'
-    env: COMMAND=test
-  - node_js: '11'
-    env: COMMAND=test
   - node_js: '12'
     env: COMMAND=test
-  - node_js: '13'
-    env: COMMAND=test
   - node_js: '14'
+    env: COMMAND=test
+  - node_js: '16'
     env: COMMAND=test
 script:
 - npm run "$COMMAND"
