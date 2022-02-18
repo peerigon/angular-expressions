@@ -404,6 +404,12 @@ describe("expressions", function () {
 					})
 				).to.equal("1.23€");
 			});
+
+			it("should show error message when filter does not exist", function () {
+				expect(function () {
+					compile("1.2345 | xxx");
+				}).to.throw("Filter 'xxx' is not defined");
+			});
 		});
 
 		describe("when evaluating the same expression multiple times", function () {
