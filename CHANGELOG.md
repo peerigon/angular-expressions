@@ -1,3 +1,11 @@
+### 1.1.6
+
+Add typescript typings (for compile, Parser and Lexer).
+
+### 1.1.5
+
+Add specific error when a filter is not defined.
+
 ### 1.1.4
 
 Bugfix : When using an assignment expression, such as `b = a`, the value will always be set in the scope, not in the locals.

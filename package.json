@@ -5,8 +5,9 @@
   "main": "./lib/main.js",
   "scripts": {
     "es-check": "es-check es5 lib/*.js",
-    "preversion": "npm run es-check && npm run lint && npm run test",
+    "preversion": "npm run es-check && npm run lint && npm run test && npm run test:typings",
     "test": "mocha test/main.test.js -R spec",
+    "test:typings": "tsd .",
     "lint": "eslint lib test && prettier lib/*.js test/*.js --list-different",
     "lint:fix": "eslint --fix lib test && prettier --write lib/*.js test/*.js"
   },
@@ -25,6 +26,7 @@
     "eslint": "^8.9.0",
     "mocha": "^9.2.0",
     "prettier": "^2.5.1",
+    "tsd": "^0.24.1",
     "webpack": "^5.69.1",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4"
@@ -48,5 +50,6 @@
     ]
   },
   "author": "peerigon <developers@peerigon.com>",
+  "types": "./lib/main.d.ts",
   "license": "Unlicense"
 }
