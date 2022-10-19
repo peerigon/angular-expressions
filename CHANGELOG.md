@@ -1,6 +1,10 @@
-### 1.1.6
+### 1.1.7
 
 Add typescript typings (for compile, Parser and Lexer).
+
+### 1.1.6
+
+Published by mistake (same as 1.1.7), but without dependency changes
 
 ### 1.1.5
 
