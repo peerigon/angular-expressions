@@ -1,3 +1,7 @@
+### 1.1.8
+
+Update typescript typings (add filters).
+
 ### 1.1.7
 
 Add typescript typings (for compile, Parser and Lexer).
