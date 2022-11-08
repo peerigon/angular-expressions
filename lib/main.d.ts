@@ -5,7 +5,6 @@ interface LexerOptions {
 
 interface ParserOptions {
   csp?: boolean;
-  expensiveChecks?: boolean;
   literals?: {
     [x: string]: any;
   };
