@@ -1,5 +1,3 @@
-**A security vulnerability has been found that affects all versions before 1.1.2. Please read this advisory https://github.com/peerigon/angular-expressions/security/advisories/GHSA-j6px-jwvv-vpwq for more information.**
-
 # angular-expressions
 
 **[angular's nicest part](https://github.com/angular/angular.js/blob/6b049c74ccc9ee19688bb9bbe504c300e61776dc/src/ng/parse.js) extracted as a standalone module for the browser and node.**
