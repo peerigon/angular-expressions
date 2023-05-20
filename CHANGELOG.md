@@ -1,3 +1,7 @@
+### 1.1.9
+
+Update typescript typings (add `.assign` method)
+
 ### 1.1.8
 
 Update typescript typings (add filters).
