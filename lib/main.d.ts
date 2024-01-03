@@ -23,6 +23,8 @@ type CompileFunc = {
   };
 };
 
+type FilterFunction = (input: any, ...args: any[]) => any;
+
 export const compile: CompileFunc;
 
 export class Lexer {
@@ -30,9 +32,13 @@ export class Lexer {
 }
 
 export const filters: {
-  [x: string]: (input: any, ...args: any[]) => any;
+  [x: string]: FilterFunction;
 };
 
 export class Parser {
-  constructor(options?: ParserOptions);
+  constructor(
+    lexer: Lexer,
+    filterFunction: (tag: any) => FilterFunction,
+    options?: ParserOptions
+  );
 }
