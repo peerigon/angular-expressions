@@ -1,3 +1,7 @@
+### 1.1.10
+
+Update typescript typings for "Parser"
+
 ### 1.1.9
 
 Update typescript typings (add `.assign` method)
