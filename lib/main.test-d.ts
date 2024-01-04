@@ -1,9 +1,13 @@
 import expressions from "./main.js";
 import { filters } from "./main.js";
 
-const { Parser } = expressions;
+const { Parser, Lexer } = expressions;
 
-const ppp = new Parser({ csp: true });
+function getFilters(tag: any) {
+  return filters[tag];
+}
+
+const ppp = new Parser(new Lexer(), getFilters, { csp: true });
 const f = expressions.compile("x + 1");
 const myResult = f.assign({}, 123);
 
