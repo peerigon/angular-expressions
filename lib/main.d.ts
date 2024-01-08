@@ -42,3 +42,12 @@ export class Parser {
     options?: ParserOptions
   );
 }
+
+export class AngularExpressions {
+  filters: { [x: string]: FilterFunction };
+  cache: { [x: string]: any };
+
+  constructor(filters?: { [x: string]: FilterFunction });
+
+  compile: (tag: string, lexerOptions?: LexerOptions) => EvaluatorFunc;
+}

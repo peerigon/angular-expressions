@@ -4,6 +4,7 @@ var chai = require("chai");
 var expect = chai.expect;
 var expressions = require("../lib/main.js");
 var compile = expressions.compile;
+var AngularExpressions = expressions.AngularExpressions;
 
 chai.config.includeStack = true;
 
@@ -478,6 +479,104 @@ describe("expressions", function () {
 	describe(".filters", function () {
 		it("should be an object", function () {
 			expect(expressions.filters).to.be.an("object");
+		});
+	});
+
+	describe(".AngularExpressions", function () {
+		it("should return a function", function () {
+			const expression = new AngularExpressions();
+
+			expect(expression.compile("")).to.be.an("function");
+		});
+
+		it("prototype creation should return a function", function () {
+			const expression = Object.create(AngularExpressions.prototype);
+
+			expect(expression.compile("")).to.be.an("function");
+		});
+
+		describe(".AngularExpressions.compile(src)", function () {
+			it("should compile and apply the given filter", function () {
+				const expression = new AngularExpressions({
+					currency: (input, currency, digits) => {
+						const result = input.toFixed(digits);
+
+						if (currency === "EUR") {
+							return `${result}€`;
+						}
+
+						return `${result}$`;
+					},
+				});
+
+				const evaluate = expression.compile(
+					"1.2345 | currency:selectedCurrency:2"
+				);
+
+				expect(
+					evaluate({
+						selectedCurrency: "EUR",
+					})
+				).to.eql("1.23€");
+			});
+
+			it("should show error message when filter does not exist", function () {
+				const expression = new AngularExpressions({});
+
+				expect(function () {
+					expression.compile("1.2345 | xxx");
+				}).throws("Filter 'xxx' is not defined");
+			});
+		});
+
+		describe(".AngularExpressions.filters", function () {
+			it("should be an object", function () {
+				const expression = new AngularExpressions();
+
+				expect(expression.filters).to.be.an("object");
+			});
+
+			it("different object instances with same filter name with but different function should result in the expect output", function () {
+				const expressionsOne = new AngularExpressions({
+					transform: (tag) => tag.toUpperCase(),
+				});
+				const expressionsTwo = new AngularExpressions({
+					transform: (tag) => tag.toLowerCase(),
+				});
+				const text = '"The Quick Fox Jumps Over The Brown Log" | transform';
+				const resultOne = expressionsOne.compile(text);
+				const resultTwo = expressionsTwo.compile(text);
+
+				expect(resultOne(text)).to.eql(
+					"THE QUICK FOX JUMPS OVER THE BROWN LOG"
+				);
+				expect(resultTwo(text)).to.eql(
+					"the quick fox jumps over the brown log"
+				);
+			});
+
+			it("should not have the same filters for different object instances", function () {
+				const expressionsOne = new AngularExpressions({
+					upper: (tag) => tag.toUpperCase(),
+				});
+				const expressionsTwo = new AngularExpressions({
+					lower: (tag) => tag.toLowerCase(),
+				});
+				const text = '"The Quick Fox Jumps Over The Brown Log"';
+				const resultOne = expressionsOne.compile(`${text} | upper`);
+				const resultTwo = expressionsTwo.compile(`${text} | lower`);
+
+				expect(expressionsOne.filters).to.have.property("upper");
+				expect(expressionsOne.filters).to.not.have.property("lower");
+				expect(expressionsTwo.filters).to.have.property("lower");
+				expect(expressionsTwo.filters).to.not.have.property("upper");
+				expect(resultOne(text)).to.eql(
+					"THE QUICK FOX JUMPS OVER THE BROWN LOG"
+				);
+				expect(resultTwo(text)).to.eql(
+					"the quick fox jumps over the brown log"
+				);
+			});
 		});
 	});
 
