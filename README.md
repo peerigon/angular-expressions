@@ -73,6 +73,23 @@ expr({
 }); // returns '1.23€'
 ```
 
+Also if you need independent filter object for e.g. tenant isolation, this can be achieved by creating an instance of the `AngularExpressions` object:
+
+```javascript
+var expressionsInstance = new AngularExpressions({
+  transform: (input) => input.toLowerCase()
+});
+var anotherExpressionsInstance = new AngularExpressions({
+  transform: (input) => input.toUpperCase()
+});
+
+var resultOne = expressionsInstance.compile("'Foo Bar' | transform");
+var resultTwo = anotherExpressionsInstance.compile("'Foo Bar' | transform");
+
+console.log(resultOne()); // prints 'foo bar'
+console.log(resultTwo()); // prints 'FOO BAR'
+```
+
 <br />
 
 ## API
@@ -108,6 +125,22 @@ A cache containing all compiled functions. The src is used as key. Set this on `
 #### .filters = {}
 
 An empty object where you may define your custom filters.
+
+#### .AngularExpressions: Class
+
+Create an instance of the angular-expressions package to isolate the `filters` object by initialized instance.
+
+This allows you to have multiple instances for e.g. multi tenant support.
+
+Example usage:
+```javascript
+var expressionsInstance = new AngularExpressions({
+  uppercase: (input) => input.toUpperCase(),
+  lowercase: (input) => input.toLowerCase(),
+});
+
+var result = expressionsInstance.compile("'Foo Bar' | transform");
+```
 
 #### .Lexer
 
