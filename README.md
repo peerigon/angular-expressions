@@ -73,7 +73,7 @@ expr({
 }); // returns '1.23€'
 ```
 
-Also if you need independent filter object for e.g. tenant isolation, this can be achieved by creating an instance of the `AngularExpressions` object:
+If you need an isolated `filters` object, this can be achieved by creating an instance of the `AngularExpressions` class:
 
 ```javascript
 var expressionsInstance = new AngularExpressions({
@@ -128,9 +128,9 @@ An empty object where you may define your custom filters.
 
 #### .AngularExpressions: Class
 
-Create an instance of the angular-expressions package to isolate the `filters` object by initialized instance.
+Create an instance of the angular-expressions package to isolate the `filters` object by initialized an instance.
 
-This allows you to have multiple instances for e.g. multi tenant support.
+This allows e.g. multi tenant support.
 
 Example usage:
 ```javascript
