@@ -73,6 +73,23 @@ expr({
 }); // returns '1.23€'
 ```
 
+If you need an isolated `filters` object, this can be achieved by setting the `filters` attribute in the `options` argument. Global cache is disabled if using `options.filters`. To setup an isolated cache, you can also set the `cache` attribute in the `options` argument:
+
+```javascript
+var isolatedFilters = {
+  transform: (input) => input.toLowerCase(),
+};
+var isolatedCache = {};
+
+var resultOne = expressions.compile("'Foo Bar' | transform", {
+  filters: isolatedFilters,
+  cache: isolatedCache,
+});
+
+console.log(resultOne());   // prints 'foo bar'
+console.log(isolatedCache); // prints '{"'Foo Bar' | transform": [Function fn] }'
+```
+
 <br />
 
 ## API

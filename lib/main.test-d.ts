@@ -30,3 +30,10 @@ const cache = expressions.compile.cache;
 const ast = expressions.compile("foobar").ast;
 
 filters.uppercase = (input: string): string => input.toUpperCase();
+
+expressions.compile("number | square", {
+  filters: {
+    square: (input: number) => input * input,
+  },
+  cache: {}
+});

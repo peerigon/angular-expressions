@@ -412,6 +412,94 @@ describe("expressions", function () {
 			});
 		});
 
+		describe("when using argument options.filters", function () {
+			it("should compile and apply the given filter", function () {
+				const evaluate = compile("1.2345 | currency:selectedCurrency:2", {
+					filters: {
+						currency: (input, currency, digits) => {
+							const result = input.toFixed(digits);
+
+							if (currency === "EUR") {
+								return `${result}€`;
+							}
+
+							return `${result}$`;
+						},
+					},
+				});
+
+				expect(
+					evaluate({
+						selectedCurrency: "EUR",
+					})
+				).to.eql("1.23€");
+			});
+
+			it("should show error message when filter does not exist", function () {
+				expect(function () {
+					compile("1.2345 | xxx", {
+						filters: {},
+					});
+				}).throws("Filter 'xxx' is not defined");
+			});
+
+			it("should have independent filter and cache object", function () {
+				const filters = {
+					toDollars: (input) => {
+						const result = input.toFixed(2);
+						return `${result}$`;
+					},
+				};
+				const cache = {};
+
+				compile("1.2345 | toDollars", {
+					filters,
+					cache,
+				});
+
+				expect(expressions.filters).to.not.equal(filters);
+				expect(expressions.filters).to.not.have.property("toDollars");
+				expect(cache).to.have.property("1.2345 | toDollars");
+			});
+
+			it("should have different outcomes for the same filter name using different filter objects with different functions", function () {
+				const firstFilters = {
+					transform: (tag) => tag.toUpperCase(),
+				};
+				const secondFilters = {
+					transform: (tag) => tag.toLowerCase(),
+				};
+
+				const text = '"The Quick Fox Jumps Over The Brown Log" | transform';
+				const resultOne = compile(text, { filters: firstFilters });
+				const resultTwo = compile(text, { filters: secondFilters });
+
+				expect(resultOne(text)).to.eql(
+					"THE QUICK FOX JUMPS OVER THE BROWN LOG"
+				);
+				expect(resultTwo(text)).to.eql(
+					"the quick fox jumps over the brown log"
+				);
+			});
+		});
+
+		describe("when using argument options.cache", function () {
+			it("should use passed cache object", function () {
+				const cache = {};
+
+				compile("5.4321 | toDollars", {
+					filters: {
+						toDollars: (input) => input.toFixed(2),
+					},
+					cache,
+				});
+
+				expect(compile.cache).to.not.equal(cache);
+				expect(compile.cache).to.not.have.property("5.4321 | toDollars");
+				expect(cache).to.have.property("5.4321 | toDollars");
+			});
+		});
+
 		describe("when evaluating the same expression multiple times", function () {
 			it("should cache the generated function", function () {
 				expect(compile("a")).to.equal(compile("a"));
