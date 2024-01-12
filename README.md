@@ -87,7 +87,7 @@ var resultOne = expressions.compile("'Foo Bar' | transform", {
 });
 
 console.log(resultOne());   // prints 'foo bar'
-console.log(isolatedCache); // print '{"'Foo Bar' | transform": [Function fn] }'
+console.log(isolatedCache); // prints '{"'Foo Bar' | transform": [Function fn] }'
 ```
 
 <br />
