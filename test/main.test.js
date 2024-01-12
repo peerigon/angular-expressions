@@ -569,6 +569,29 @@ describe("expressions", function () {
 		});
 	});
 
+	describe(".csp", function () {
+		it("should allow to change csp : which uses no code generation from strings", function () {
+			const result = compile("test + 1", {
+				csp: false,
+			})({
+				test: 3,
+			});
+
+			expect(result).to.equal(4);
+		});
+	});
+
+	describe(".literals", function () {
+		it("should be possible to change literals", function () {
+			const result = compile("key + key", {
+				literals: {
+					key: "MYKEY",
+				},
+			})();
+			expect(result).to.equal("MYKEYMYKEY");
+		});
+	});
+
 	describe("Special characters", function () {
 		var evaluate;
 		it("should allow to define isIdentifierStart and isIdentifierContinue", function () {

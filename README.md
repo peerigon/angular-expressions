@@ -86,7 +86,7 @@ var resultOne = expressions.compile("'Foo Bar' | transform", {
   cache: isolatedCache,
 });
 
-console.log(resultOne());   // prints 'foo bar'
+console.log(resultOne()); // prints 'foo bar'
 console.log(isolatedCache); // prints '{"'Foo Bar' | transform": [Function fn] }'
 ```
 

@@ -8,8 +8,8 @@
     "preversion": "npm run es-check && npm run lint && npm run test && npm run test:typings",
     "test": "mocha test/main.test.js -R spec",
     "test:typings": "tsd .",
-    "lint": "eslint lib test && prettier lib/*.js test/*.js lib/*.ts --list-different",
-    "lint:fix": "eslint --fix lib test && prettier --write lib/*.js test/*.js lib/*.ts"
+    "lint": "eslint lib test && prettier lib/*.js test/*.js lib/*.ts *.md --list-different",
+    "lint:fix": "eslint --fix lib test && prettier --write lib/*.js test/*.js *.md lib/*.ts"
   },
   "keywords": [
     "angular",

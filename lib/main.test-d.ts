@@ -35,5 +35,5 @@ expressions.compile("number | square", {
   filters: {
     square: (input: number) => input * input,
   },
-  cache: {}
+  cache: {},
 });
