@@ -1,5 +1,5 @@
 import expressions from "./main.js";
-import { filters, AngularExpressions } from "./main.js";
+import { filters } from "./main.js";
 
 const { Parser, Lexer } = expressions;
 
@@ -24,12 +24,16 @@ function validChars(ch: string) {
   );
 }
 
-const expressionsInstance = new AngularExpressions();
-
 expressions.compile("être_embarassé", { isIdentifierStart: validChars });
-expressionsInstance.compile("être_embarassé", { isIdentifierStart: validChars });
 
 const cache = expressions.compile.cache;
 const ast = expressions.compile("foobar").ast;
 
 filters.uppercase = (input: string): string => input.toUpperCase();
+
+expressions.compile("number | square", {
+  filters: {
+    square: (input: number) => input * input,
+  },
+  cache: {}
+});

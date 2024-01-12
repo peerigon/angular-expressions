@@ -10,6 +10,19 @@ interface ParserOptions {
   };
 }
 
+interface Filters {
+  [x: string]: FilterFunction;
+}
+
+interface Cache {
+  [x: string]: any;
+}
+
+interface CompileFuncOptions extends LexerOptions {
+  filters?: Filters;
+  cache?: Cache;
+}
+
 type EvaluatorFunc = {
   (scope?: any, context?: any): any;
   ast: any;
@@ -17,10 +30,8 @@ type EvaluatorFunc = {
 };
 
 type CompileFunc = {
-  (tag: string, lexerOptions?: LexerOptions): EvaluatorFunc;
-  cache: {
-    [x: string]: any;
-  };
+  (tag: string, options?: CompileFuncOptions): EvaluatorFunc;
+  cache: Cache;
 };
 
 type FilterFunction = (input: any, ...args: any[]) => any;
@@ -31,9 +42,7 @@ export class Lexer {
   constructor(options?: LexerOptions);
 }
 
-export const filters: {
-  [x: string]: FilterFunction;
-};
+export const filters: Filters;
 
 export class Parser {
   constructor(
@@ -41,13 +50,4 @@ export class Parser {
     filterFunction: (tag: any) => FilterFunction,
     options?: ParserOptions
   );
-}
-
-export class AngularExpressions {
-  filters: { [x: string]: FilterFunction };
-  cache: { [x: string]: any };
-
-  constructor(filters?: { [x: string]: FilterFunction });
-
-  compile: (tag: string, lexerOptions?: LexerOptions) => EvaluatorFunc;
 }
