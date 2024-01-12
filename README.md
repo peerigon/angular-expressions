@@ -73,21 +73,21 @@ expr({
 }); // returns '1.23€'
 ```
 
-If you need an isolated `filters` object, this can be achieved by creating an instance of the `AngularExpressions` class:
+If you need an isolated `filters` object, this can be achieved by setting the `filters` attribute in the `options` argument. Global cache is disabled if using `options.filters`. To setup an isolated cache, you can also set a `cache` object in the `options` argument. It can then be used to speed up subsequent calls:
 
 ```javascript
-var expressionsInstance = new AngularExpressions({
-  transform: (input) => input.toLowerCase()
-});
-var anotherExpressionsInstance = new AngularExpressions({
-  transform: (input) => input.toUpperCase()
-});
+var isolatedFilters = {
+  transform: (input) => input.toLowerCase(),
+};
+var isolatedCache = {};
 
-var resultOne = expressionsInstance.compile("'Foo Bar' | transform");
-var resultTwo = anotherExpressionsInstance.compile("'Foo Bar' | transform");
+var resultOne = expressions.compile("'Foo Bar' | transform", {
+  filters: isolatedFilters,
+  cache: isolatedCache,
+});
 
 console.log(resultOne()); // prints 'foo bar'
-console.log(resultTwo()); // prints 'FOO BAR'
+console.log(isolatedCache); // print '{"'Foo Bar' | transform": [Function fn] }'
 ```
 
 <br />
@@ -125,22 +125,6 @@ A cache containing all compiled functions. The src is used as key. Set this on `
 #### .filters = {}
 
 An empty object where you may define your custom filters.
-
-#### .AngularExpressions: Class
-
-Create an instance of the angular-expressions package to isolate the `filters` object by initialized an instance.
-
-This allows e.g. multi tenant support.
-
-Example usage:
-```javascript
-var expressionsInstance = new AngularExpressions({
-  uppercase: (input) => input.toUpperCase(),
-  lowercase: (input) => input.toLowerCase(),
-});
-
-var result = expressionsInstance.compile("'Foo Bar' | transform");
-```
 
 #### .Lexer
 
