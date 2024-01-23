@@ -1,14 +1,14 @@
 ### 1.2.0
 
-Add four options to the compile method :
+Add four options to the second arg of the compile method :
 
-- `compile({filters: { upper: (input) => input.toUpperCase()}})` which adds filters to a specific instance (those filters are not shared between instances).
+- `compile(tag, {filters: { upper: (input) => input.toUpperCase()}})` which adds filters to a specific instance (those filters are not shared between instances).
 
-- `compile({cache: {}})` to set a "non global" cache.
+- `compile(tag, {cache: {}})` to set a "non global" cache.
 
-- `compile({csp: true})` to use the interpreter (avoid use of "new Function()" which is for example not allowed in Vercel).
+- `compile(tag, {csp: true})` to use the interpreter (avoid use of "new Function()" which is for example not allowed in Vercel).
 
-- `compile({literals: {/* */ }})` which allows to customize literals (such as null, true, false, undefined)
+- `compile(tag, {literals: {/* */ }})` which allows to customize literals (such as null, true, false, undefined)
 
 ### 1.1.10
 
