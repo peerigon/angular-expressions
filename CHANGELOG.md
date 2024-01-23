@@ -8,7 +8,7 @@ Add four options to the second arg of the compile method :
 
 - `compile(tag, {csp: true})` to use the interpreter (avoid use of "new Function()" which is for example not allowed in Vercel).
 
-- `compile(tag, {literals: {/* */ }})` which allows to customize literals (such as null, true, false, undefined)
+- `compile(tag, {literals: { true: true, false: false, null: null, undefined: undefined } })` which allows to customize literals (such as null, true, false, undefined)
 
 ### 1.1.10
 
