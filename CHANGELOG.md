@@ -1,3 +1,7 @@
+### 1.2.1
+
+Bugfix `compile(tag, { csp: true })` should now work correctly.
+
 ### 1.2.0
 
 Add four options to the second arg of the compile method :
@@ -6,7 +10,7 @@ Add four options to the second arg of the compile method :
 
 - `compile(tag, {cache: {}})` to set a "non global" cache.
 
-- `compile(tag, {csp: true})` to use the interpreter (avoid use of "new Function()" which is for example not allowed in Vercel).
+- `compile(tag, { csp: true })` to use the interpreter (avoid use of "new Function()" which is for example not allowed in Vercel).
 
 - `compile(tag, {literals: { true: true, false: false, null: null, undefined: undefined } })` which allows to customize literals (such as null, true, false, undefined)
 
