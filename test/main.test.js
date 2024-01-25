@@ -5,6 +5,14 @@ var expect = chai.expect;
 var expressions = require("../lib/main.js");
 var compile = expressions.compile;
 
+function resolveSoon(val) {
+	return new Promise(function (resolve) {
+		setTimeout(function () {
+			resolve(val);
+		}, 1);
+	});
+}
+
 chai.config.includeStack = true;
 
 // These tests make no claim to be complete. We only test the most important parts of angular expressions.
@@ -409,6 +417,28 @@ describe("expressions", function () {
 				expect(function () {
 					compile("1.2345 | xxx");
 				}).to.throw("Filter 'xxx' is not defined");
+			});
+
+			it("should work with promise", async function () {
+				expressions.filters.sumAge = async function (input) {
+					input = await input;
+					return input.reduce(function (sum, { age }) {
+						return sum + age;
+					}, 0);
+				};
+
+				const evaluate = compile("users | sumAge");
+				const res = await evaluate({
+					users: resolveSoon([
+						{
+							age: 22,
+						},
+						{
+							age: 23,
+						},
+					]),
+				});
+				expect(res).to.equal(45);
 			});
 		});
 

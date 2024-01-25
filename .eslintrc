@@ -1,7 +1,4 @@
 {
-  "parserOptions" : {
-    "ecmaVersion": 7
-  },
   "plugins": [],
   "globals":{
     "Promise": true,
@@ -12,7 +9,8 @@
   "env": {
     "node": true,
     "browser": true,
-    "mocha": true
+    "mocha": true,
+    "es2023": true,
   },
   "rules": {
     "accessor-pairs": 2,
