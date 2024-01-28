@@ -5,7 +5,7 @@
   "main": "./lib/main.js",
   "scripts": {
     "es-check": "es-check es5 lib/*.js",
-    "preversion": "npm run es-check && npm run lint && npm run test && npm run test:typings",
+    "preversion": "npm run es-check && npm run lint && npm run test && npm run test:typings && attw . --pack",
     "test": "mocha test/main.test.js -R spec",
     "test:typings": "tsd .",
     "lint": "eslint lib test && prettier lib/*.js test/*.js lib/*.ts *.md --list-different",
@@ -21,6 +21,7 @@
     "source"
   ],
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.13.6",
     "chai": "^4.3.7",
     "es-check": "^7.1.1",
     "eslint": "^8.56.0",
