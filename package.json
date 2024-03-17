@@ -21,16 +21,16 @@
     "source"
   ],
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.13.6",
+    "@arethetypeswrong/cli": "^0.15.1",
     "chai": "^4.3.7",
     "es-check": "^7.1.1",
-    "eslint": "^8.56.0",
-    "mocha": "^10.2.0",
-    "prettier": "^3.1.1",
-    "tsd": "^0.30.3",
-    "webpack": "^5.89.0",
+    "eslint": "^8.57.0",
+    "mocha": "^10.3.0",
+    "prettier": "^3.2.5",
+    "tsd": "^0.30.7",
+    "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1"
+    "webpack-dev-server": "^5.0.3"
   },
   "repository": {
     "type": "git",
