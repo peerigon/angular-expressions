@@ -611,6 +611,42 @@ describe("expressions", function () {
 		});
 	});
 
+	describe("Equality", function () {
+		let evaluate;
+		it("should work with ===", function () {
+			evaluate = compile("a === b");
+			expect(evaluate({ a: true, b: true })).to.eql(true);
+		});
+		it("should work with ===", function () {
+			evaluate = compile("a === b");
+			expect(evaluate({ a: true, b: 1 })).to.eql(false);
+		});
+		it("should work with ==", function () {
+			evaluate = compile("a == b");
+			expect(evaluate({ a: true, b: true })).to.eql(true);
+		});
+		it("should work with ==", function () {
+			evaluate = compile("a == b");
+			expect(evaluate({ a: true, b: 1 })).to.eql(true);
+		});
+		it("should work with !==", function () {
+			evaluate = compile("a !== b");
+			expect(evaluate({ a: "8", b: 8 })).to.eql(true);
+		});
+		it("should work with !==", function () {
+			evaluate = compile("a !== b");
+			expect(evaluate({ a: true, b: true })).to.eql(false);
+		});
+		it("should work with !=", function () {
+			evaluate = compile("a != b");
+			expect(evaluate({ a: true, b: true })).to.eql(false);
+		});
+		it("should work with !=", function () {
+			evaluate = compile("a != b");
+			expect(evaluate({ a: "8", b: 8 })).to.eql(false);
+		});
+	});
+
 	describe(".literals", function () {
 		it("should be possible to change literals", function () {
 			const result = compile("key + key", {
