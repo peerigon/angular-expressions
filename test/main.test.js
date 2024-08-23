@@ -702,12 +702,16 @@ describe("expressions", function () {
 			expect(evaluate({ users: [1, 4, 4] })).to.eql(3);
 		});
 
-		// it("should disallow from changing prototype", function() {
-		// 	evaluate = compile("name.split = 10");
-		// 	var scope = { name: "hello" };
-		// 	evaluate(scope);
-		// 	expect(scope.name.split).to.be.a("function");
-		// });
+		it("should disallow from changing prototype", function() {
+			let err;
+			try {
+				evaluate = compile("name.split = 10");
+				evaluate({ name: "hello"});
+			} catch (e) {
+				err = e;
+			}
+			expect(err.message).to.equal("Cannot create property 'split' on string 'hello'");
+		});
 
 		it("should work with __proto__", function () {
 			evaluate = compile("__proto__");
@@ -717,6 +721,21 @@ describe("expressions", function () {
 		it("should work with toString", function () {
 			evaluate = compile("toString");
 			expect(evaluate({ toString: 10 })).to.eql(10);
+		});
+	});
+
+	describe("Semicolon support", function () {
+		var evaluate;
+
+		it("should work with a;b", function () {
+			evaluate = compile("a;b");
+			expect(evaluate({ a: 10, b: 5 })).to.eql(5);
+		});
+
+		it("should work with assignment and semicolon", function () {
+			evaluate = compile("a = a + 1; a");
+			expect(evaluate({ a: 0 })).to.eql(1);
+			expect(evaluate({ a: 2 })).to.eql(3);
 		});
 	});
 });
