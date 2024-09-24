@@ -1,3 +1,14 @@
+### 1.3.0
+
+Add support for template literals.
+
+It is now possible to write :
+
+```js
+compile("`Hello ${user}`")({ user: "John" });
+// Returns "Hello John"
+```
+
 ### 1.2.1
 
 Bugfix `compile(tag, { csp: true })` should now work correctly.
