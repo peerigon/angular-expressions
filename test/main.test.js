@@ -96,6 +96,38 @@ describe("expressions", function () {
 				expect(evaluate(scope)).to.equal("string");
 			});
 
+			it("should return `string` with backticks", function () {
+				evaluate = compile("`string`");
+				expect(evaluate(scope)).to.equal("string");
+			});
+
+			it("should return `string` with backticks and quotes", function () {
+				evaluate = compile("`string'' \"string`");
+				expect(evaluate(scope)).to.equal("string'' \"string");
+			});
+
+			it("should work with `string` with new lines", function () {
+				evaluate = compile("`string\n`");
+				expect(evaluate(scope)).to.equal("string\n");
+			});
+
+			it("should work with variable substitutions `Hello ${name}`", function () {
+				evaluate = compile("`Hello ${name}, what's up ?`");
+				expect(evaluate({ name: "John" })).to.equal("Hello John, what's up ?");
+			});
+
+			it("should work with variable substitutions `Hello ${3*3}`", function () {
+				evaluate = compile("`Hello ${3*3}, what's up ?`");
+				expect(evaluate({ name: "John" })).to.equal("Hello 9, what's up ?");
+			});
+
+			it("should work with multiple variable substitutions", function () {
+				evaluate = compile("`User : ${user}, Age : ${age}`");
+				expect(evaluate({ user: "John", age: 55 })).to.equal(
+					"User : John, Age : 55"
+				);
+			});
+
 			it("should return [ship, 1, 2, []]", function () {
 				evaluate = compile("[ship, 1, 2, []]");
 				expect(evaluate(scope)).to.eql([scope.ship, 1, 2, []]);
@@ -702,15 +734,17 @@ describe("expressions", function () {
 			expect(evaluate({ users: [1, 4, 4] })).to.eql(3);
 		});
 
-		it("should disallow from changing prototype", function() {
+		it("should disallow from changing prototype", function () {
 			let err;
 			try {
 				evaluate = compile("name.split = 10");
-				evaluate({ name: "hello"});
+				evaluate({ name: "hello" });
 			} catch (e) {
 				err = e;
 			}
-			expect(err.message).to.equal("Cannot create property 'split' on string 'hello'");
+			expect(err.message).to.equal(
+				"Cannot create property 'split' on string 'hello'"
+			);
 		});
 
 		it("should work with __proto__", function () {
