@@ -164,6 +164,15 @@ describe("expressions", function () {
 				evaluate = compile("this");
 				expect(evaluate(scope)).to.equal(scope);
 			});
+
+			it("should be possible to access the 'this' key if setting the handleThis config to false", function () {
+				expect(
+					compile("this + this", { handleThis: false })({ this: 2 })
+				).to.equal(4);
+				expect(compile("this + this")({ this: 2 })).to.equal(
+					"[object Object][object Object]"
+				);
+			});
 		});
 
 		describe("when evaluating simple assignments", function () {
@@ -521,7 +530,7 @@ describe("expressions", function () {
 
 				expect(expressions.filters).to.not.equal(filters);
 				expect(expressions.filters).to.not.have.property("toDollars");
-				expect(cache).to.have.property("1.2345 | toDollars");
+				expect(Object.keys(cache).length).to.equal(1);
 			});
 
 			it("should have different outcomes for the same filter name using different filter objects with different functions", function () {
@@ -549,6 +558,7 @@ describe("expressions", function () {
 			it("should use passed cache object", function () {
 				const cache = {};
 
+				expect(Object.keys(cache).length).to.equal(0);
 				compile("5.4321 | toDollars", {
 					filters: {
 						toDollars: (input) => input.toFixed(2),
@@ -556,9 +566,9 @@ describe("expressions", function () {
 					cache,
 				});
 
+				expect(Object.keys(cache).length).to.equal(1);
 				expect(compile.cache).to.not.equal(cache);
 				expect(compile.cache).to.not.have.property("5.4321 | toDollars");
-				expect(cache).to.have.property("5.4321 | toDollars");
 			});
 		});
 
@@ -610,9 +620,9 @@ describe("expressions", function () {
 			});
 
 			it("should cache the generated function by the expression", function () {
-				var fn = compile("a");
-
-				expect(compile.cache.a).to.equal(fn);
+				const cache = {};
+				var fn = compile("a", { cache });
+				expect(Object.values(cache)[0]).to.equal(fn);
 			});
 
 			describe("when setting it to false", function () {
@@ -640,6 +650,23 @@ describe("expressions", function () {
 			});
 
 			expect(result).to.equal(4);
+		});
+
+		it("should return the scope even when the 'this' keyword is used", function () {
+			const scope = "Hello scope";
+			const evaluate = compile("this", {
+				csp: false,
+			});
+			expect(evaluate(scope)).to.equal(scope);
+		});
+
+		it("should be possible to use handleThis to return scope['this']", function () {
+			const scope = { this: "myval" };
+			const evaluate = compile("this", {
+				handleThis: false,
+				csp: false,
+			});
+			expect(evaluate(scope)).to.equal("myval");
 		});
 	});
 

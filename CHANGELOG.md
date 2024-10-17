@@ -1,3 +1,12 @@
+### 1.4.0
+
+Add support for `handleThis: false` to disable handling of this.
+
+(By default handleThis is true).
+
+This way, if you write : `{this | filter}`, the `this` will be used as a key
+from the scope, eg `scope["this"]`.
+
 ### 1.3.0
 
 Add support for template literals.
