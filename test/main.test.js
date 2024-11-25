@@ -40,6 +40,14 @@ describe("expressions", function () {
 
 			expect(parser.parse).to.be.a("function");
 		});
+
+		it("should work with Parser and use handleThis by default", function () {
+			expect(
+				new expressions.Parser(new expressions.Lexer(), null, {
+					csp: true,
+				}).parse("this+this")(2)
+			).to.equal(4);
+		});
 	});
 
 	describe(".compile(src)", function () {
