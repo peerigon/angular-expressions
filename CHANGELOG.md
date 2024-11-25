@@ -1,10 +1,14 @@
-### 1.4.1
+### 1.4.2
 
 Make `handleThis` the default if you use the `Lexer` and `Parser` directly, and you don't use `.compile`.
 
 This is a way less common use case but it makes sense to have handleThis be the same default for both cases.
 
 (This also makes the library behave in the same way between 1.3.0 and 1.4.1 when using Parser or Lexer). There was a backwards incompatible change brought by 1.4.0 for users of `Parser`.
+
+### 1.4.1
+
+Don't use this version, it is missing a commit for the 1.4.2 fix
 
 ### 1.4.0
 
