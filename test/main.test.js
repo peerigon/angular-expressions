@@ -226,11 +226,38 @@ describe("expressions", function () {
 				expect(result).to.equal(undefined);
 			});
 
+			it("should not leak indirectly with string concatenation with locals", function () {
+				evaluate = compile(
+					"a = null; a = ''['c'+'onstructor']['c'+'onstructor']; a = a('return process;'); a();",
+					{ csp: true }
+				);
+				const result = evaluate({}, {});
+				expect(result).to.equal(undefined);
+			});
+
 			it("should not leak indirectly with literal string", function () {
 				evaluate = compile(
 					"a = null; a = ''['constructor']['constructor']; a = a('return process;'); a();"
 				);
 				const result = evaluate({});
+				expect(result).to.equal(undefined);
+			});
+
+			it("should not be able to rewrite hasOwnProperty", function () {
+				const scope = {
+					// Pre-condition: any function in scope that returns a truthy value
+					func: function () {
+						return "anything truthy";
+					},
+				};
+				const options = {
+					// Force to use ASTInterpreter
+					csp: true,
+				};
+				const result = expressions.compile(
+					"hasOwnProperty = func; constructor.getPrototypeOf(toString).constructor('return process')()",
+					options
+				)(scope, scope);
 				expect(result).to.equal(undefined);
 			});
 		});
@@ -676,6 +703,13 @@ describe("expressions", function () {
 			});
 			expect(evaluate(scope)).to.equal("myval");
 		});
+
+		it("should be possible to calc this+this+this", function () {
+			const evaluate = compile("this+this+this", {
+				csp: false,
+			});
+			expect(evaluate(1)).to.equal(3);
+		});
 	});
 
 	describe("Equality", function () {
@@ -756,7 +790,7 @@ describe("expressions", function () {
 
 		it("should not leak with computed prop", function () {
 			evaluate = compile("a['split']");
-			expect(evaluate({ a: "" })).to.eql(null);
+			expect(evaluate({ a: "" })).to.eql(undefined);
 		});
 
 		it("should allow to read string length", function () {
@@ -782,9 +816,42 @@ describe("expressions", function () {
 			);
 		});
 
-		it("should work with __proto__", function () {
+		it("should not show value of __proto__", function () {
 			evaluate = compile("__proto__");
 			expect(evaluate({})).to.eql(undefined);
+		});
+
+		it("should not show value of __proto__ if passing context (second argument) with csp = false", function () {
+			evaluate = compile("__proto__");
+			expect(evaluate({}, {})).to.eql(undefined);
+		});
+
+		it("should not show value of __proto__ if passing context (second argument) with csp = true", function () {
+			evaluate = compile("__proto__", {
+				csp: true,
+			});
+			expect(evaluate({}, {})).to.eql(undefined);
+		});
+
+		it("should not show value of constructor if passing context (second argument) with csp = true", function () {
+			evaluate = compile("constructor", {
+				csp: true,
+			});
+			expect(evaluate({}, {})).to.eql(undefined);
+		});
+
+		it("should not show value of this['__proto__'] if passing context (second argument) with csp = true", function () {
+			evaluate = compile("this['__proto' + '__']", {
+				csp: true,
+			});
+			expect(evaluate({}, {})).to.eql(undefined);
+		});
+
+		it("should not show value of this['__proto__'] if passing context (second argument) with csp = false", function () {
+			evaluate = compile("this['__proto' + '__']", {
+				csp: false,
+			});
+			expect(evaluate({}, {})).to.eql(undefined);
 		});
 
 		it("should work with toString", function () {
