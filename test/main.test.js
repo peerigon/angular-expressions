@@ -168,6 +168,11 @@ describe("expressions", function () {
 				expect(evaluate(scope)).to.equal(undefined);
 			});
 
+			it("should return null instead of undefined is the data contains null", function () {
+				evaluate = compile("someVal");
+				expect(evaluate({ someVal: null })).to.equal(null);
+			});
+
 			it("should return the scope even when the 'this' keyword is used", function () {
 				evaluate = compile("this");
 				expect(evaluate(scope)).to.equal(scope);
