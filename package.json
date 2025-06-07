@@ -21,17 +21,17 @@
     "source"
   ],
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.16.4",
-    "chai": "^4.3.7",
-    "es-check": "^7.2.1",
-    "eslint": "^9.16.0",
-    "globals": "^15.9.0",
-    "mocha": "^10.7.3",
-    "prettier": "^3.4.2",
-    "tsd": "^0.31.2",
-    "webpack": "^5.94.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.1.0"
+    "@arethetypeswrong/cli": "^0.18.1",
+    "chai": "^5.2.0",
+    "es-check": "^9.1.4",
+    "eslint": "^9.28.0",
+    "globals": "^16.2.0",
+    "mocha": "^11.5.0",
+    "prettier": "^3.5.3",
+    "tsd": "^0.32.0",
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
   },
   "repository": {
     "type": "git",
