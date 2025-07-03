@@ -1,3 +1,9 @@
+### 1.5.0
+
+Add support for "nullish coalescing operator".
+
+Usable like this : `user.name ?? "John"`.
+
 ### 1.4.3
 
 Disallow access to prototype chain (CVE-2024-54152) when using compile with locals (two arguments in the called function) :
