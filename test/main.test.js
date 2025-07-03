@@ -405,24 +405,24 @@ describe("expressions", function () {
 				// Basic null/undefined tests
 				evaluate = compile('null ?? "default"');
 				expect(evaluate()).to.equal("default");
-				
+
 				evaluate = compile('undefined ?? "default"');
 				expect(evaluate()).to.equal("default");
-				
+
 				// Falsy values that should NOT trigger nullish coalescing
 				evaluate = compile('0 ?? "default"');
 				expect(evaluate()).to.equal(0);
-				
+
 				evaluate = compile('false ?? "default"');
 				expect(evaluate()).to.equal(false);
-				
+
 				evaluate = compile('"" ?? "default"');
 				expect(evaluate()).to.equal("");
-				
+
 				// Truthy values
 				evaluate = compile('"hello" ?? "default"');
 				expect(evaluate()).to.equal("hello");
-				
+
 				evaluate = compile('42 ?? "default"');
 				expect(evaluate()).to.equal(42);
 			});
@@ -431,18 +431,18 @@ describe("expressions", function () {
 				// Variable that is null
 				evaluate = compile('value ?? "default"');
 				expect(evaluate({ value: null })).to.equal("default");
-				
+
 				// Variable that is undefined
 				expect(evaluate({ value: undefined })).to.equal("default");
-				
+
 				// Undefined variable (not in scope)
 				expect(evaluate({})).to.equal("default");
-				
+
 				// Variable with falsy values
 				expect(evaluate({ value: 0 })).to.equal(0);
 				expect(evaluate({ value: false })).to.equal(false);
 				expect(evaluate({ value: "" })).to.equal("");
-				
+
 				// Variable with truthy values
 				expect(evaluate({ value: "hello" })).to.equal("hello");
 				expect(evaluate({ value: 123 })).to.equal(123);
@@ -450,17 +450,17 @@ describe("expressions", function () {
 
 			it("should handle chained nullish coalescing operators", function () {
 				evaluate = compile('a ?? b ?? "fallback"');
-				
+
 				// Both a and b are null/undefined
 				expect(evaluate({ a: null, b: null })).to.equal("fallback");
 				expect(evaluate({ a: null, b: undefined })).to.equal("fallback");
 				expect(evaluate({ a: undefined, b: null })).to.equal("fallback");
 				expect(evaluate({})).to.equal("fallback");
-				
+
 				// First is null, second has value
 				expect(evaluate({ a: null, b: "found" })).to.equal("found");
 				expect(evaluate({ a: undefined, b: "found" })).to.equal("found");
-				
+
 				// First has value
 				expect(evaluate({ a: "first", b: "second" })).to.equal("first");
 				expect(evaluate({ a: 0, b: "second" })).to.equal(0);
@@ -468,28 +468,28 @@ describe("expressions", function () {
 
 			it("should demonstrate difference between || and ?? operators", function () {
 				var scope = { value: 0 };
-				
+
 				// OR operator treats 0 as falsy
 				evaluate = compile('value || "default"');
 				expect(evaluate(scope)).to.equal("default");
-				
+
 				// Nullish coalescing only triggers for null/undefined
 				evaluate = compile('value ?? "default"');
 				expect(evaluate(scope)).to.equal(0);
-				
+
 				// Same test with false
 				scope = { value: false };
 				evaluate = compile('value || "default"');
 				expect(evaluate(scope)).to.equal("default");
-				
+
 				evaluate = compile('value ?? "default"');
 				expect(evaluate(scope)).to.equal(false);
-				
+
 				// Same test with empty string
 				scope = { value: "" };
 				evaluate = compile('value || "default"');
 				expect(evaluate(scope)).to.equal("default");
-				
+
 				evaluate = compile('value ?? "default"');
 				expect(evaluate(scope)).to.equal("");
 			});
@@ -498,20 +498,20 @@ describe("expressions", function () {
 				var scope = {
 					user: {
 						name: null,
-						email: "user@example.com"
-					}
+						email: "user@example.com",
+					},
 				};
-				
+
 				evaluate = compile('user.name ?? user.email ?? "Anonymous"');
 				expect(evaluate(scope)).to.equal("user@example.com");
-				
+
 				// Test with object property access
 				evaluate = compile('user.nonexistent ?? "default"');
 				expect(evaluate(scope)).to.equal("default");
-				
+
 				// Test with array access
 				scope.items = [null, undefined, "found"];
-				evaluate = compile('items[0] ?? items[1] ?? items[2]');
+				evaluate = compile("items[0] ?? items[1] ?? items[2]");
 				expect(evaluate(scope)).to.equal("found");
 			});
 
