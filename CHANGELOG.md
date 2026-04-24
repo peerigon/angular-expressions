@@ -1,3 +1,7 @@
+### 1.5.1
+
+When executing `a.b`, the code previously attempted to access `scope["a"]` twice and `scope["a"]["b"]` twice. By storing the value in a temporary variable, we now prevent redundant access calls.
+
 ### 1.5.0
 
 Add support for "nullish coalescing operator".
