@@ -977,6 +977,32 @@ describe("expressions", function () {
 			evaluate = compile("toString");
 			expect(evaluate({ toString: 10 })).to.eql(10);
 		});
+
+		it("ensure that prototype is not looked up while resolving filters", function () {
+			const options = {
+				filters: {
+					hex(x) {
+						return parseInt("" + x, 10)
+							.toString(16)
+							.toUpperCase();
+					},
+					__proto__: {
+						hex(x) {
+							throw new Error("FAIL1");
+						},
+						hex2(x) {
+							throw new Error("FAIL2");
+						},
+					},
+				},
+			};
+
+			expect(compile("value | hex", options)({ value: 255 })).to.equal("FF");
+			expect(() => compile("value | hex2", options)({ value: 255 })).to.throw(
+				Error,
+				"Filter 'hex2' is not defined"
+			);
+		});
 	});
 
 	describe("Semicolon support", function () {
