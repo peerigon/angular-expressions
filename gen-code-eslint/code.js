@@ -144,3 +144,4 @@ var fn0 = function (s) {
   return v0;
 };
 fn.inputs = [fn0];
+return fn;
