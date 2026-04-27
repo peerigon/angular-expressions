@@ -268,15 +268,15 @@ describe("expressions", function () {
 
 			it.only("should not be able to rewrite hasOwnProperty", function () {
 				const u1 = {}.hasOwnProperty("test");
-				console.log(JSON.stringify({"u1": u1}));
+				console.log(JSON.stringify({ u1: u1 }));
 				const res = compile(`[
 				  {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne,
 				]`)({
 					returnsOne: () => 1,
 				});
-				console.log(JSON.stringify({ res: res }));
 				const u2 = {}.hasOwnProperty("test");
-				console.log(JSON.stringify({ u2: u2 }));
+				expect(u1).to.equal(false)
+				expect(u2).to.equal(false)
 			});
 		});
 
