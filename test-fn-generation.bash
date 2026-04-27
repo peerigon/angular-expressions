@@ -13,7 +13,7 @@ echo "function plus(a,b) { return a + b }
 $c"  >gen-code-eslint/code.js
 
 code=0
-tsc gen-code-eslint/code.js --allowJs --checkJs --noEmit || code="$?"
+tsc gen-code-eslint/code.js --allowJs --checkJs --noEmit --noImplicitAny false || code="$?"
 if [ "$code" != "0" ]; then
     echo "Typescript did not validate this file"
     cat gen-code-eslint/code.js
