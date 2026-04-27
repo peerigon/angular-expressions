@@ -24,4 +24,4 @@ echo "Typescript ok !"
 
 cd gen-code-eslint
 ../node_modules/.bin/eslint --config eslint.config.mjs code.js
-echo "lint ok"
+echo "Eslint ok"
