@@ -269,7 +269,6 @@ describe("expressions", function () {
 
 			it.only("should not be able to rewrite hasOwnProperty with csp: true", function () {
 				const u1 = {}.hasOwnProperty("test");
-				console.log(JSON.stringify({ u1: u1 }));
 				let myErr;
 				try {
 					const res = compile(
@@ -296,10 +295,9 @@ describe("expressions", function () {
 
 			it.only("should not be able to rewrite hasOwnProperty with csp: false", function () {
 				const u1 = {}.hasOwnProperty("test");
-				console.log(JSON.stringify({ u1: u1 }));
 				let myErr;
 				try {
-					const res = compile(
+					compile(
 						`[
 				  {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne,
 				]`,
