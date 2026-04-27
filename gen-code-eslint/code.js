@@ -30,12 +30,14 @@ var fn = function (s, l, a, i) {
       (v16.getPrototypeOf == null ||
         Object.prototype.hasOwnProperty.call(v16, "getPrototypeOf"))
     ) {
+      v15 = v16.getPrototypeOf;
     } else {
       v15 = undefined;
     }
     if (v15 != null) {
       v19 = {};
-      v13 = v15(v19);
+      v13 =
+        v16.getPrototypeOf === null ? null : v16.getPrototypeOf.call(v16, v19);
     } else {
       v13 = undefined;
     }
@@ -44,13 +46,14 @@ var fn = function (s, l, a, i) {
       (v13.hasOwnProperty == null ||
         Object.prototype.hasOwnProperty.call(v13, "hasOwnProperty"))
     ) {
+      v14 = v13.hasOwnProperty;
     } else {
       v14 = undefined;
     }
     if (
       v13 != null &&
-      (Object.prototype.hasOwnProperty.call(v13, "undefined") ||
-        v13.undefined == null)
+      (Object.prototype.hasOwnProperty.call(v13, "hasOwnProperty") ||
+        v13.hasOwnProperty == null)
     ) {
       if (!v20) {
         if (s) {
@@ -67,7 +70,7 @@ var fn = function (s, l, a, i) {
           v12 = l.returnsOne;
         }
       }
-      v11 = v13.undefined = v12;
+      v11 = v13.hasOwnProperty = v12;
     }
     if (!v20) {
       if (s) {
@@ -104,12 +107,13 @@ var fn0 = function (s) {
     (v5.getPrototypeOf == null ||
       Object.prototype.hasOwnProperty.call(v5, "getPrototypeOf"))
   ) {
+    v4 = v5.getPrototypeOf;
   } else {
     v4 = undefined;
   }
   if (v4 != null) {
     v8 = {};
-    v2 = v4(v8);
+    v2 = v5.getPrototypeOf === null ? null : v5.getPrototypeOf.call(v5, v8);
   } else {
     v2 = undefined;
   }
@@ -118,19 +122,20 @@ var fn0 = function (s) {
     (v2.hasOwnProperty == null ||
       Object.prototype.hasOwnProperty.call(v2, "hasOwnProperty"))
   ) {
+    v3 = v2.hasOwnProperty;
   } else {
     v3 = undefined;
   }
   if (
     v2 != null &&
-    (Object.prototype.hasOwnProperty.call(v2, "undefined") ||
-      v2.undefined == null)
+    (Object.prototype.hasOwnProperty.call(v2, "hasOwnProperty") ||
+      v2.hasOwnProperty == null)
   ) {
     v9 = s.returnsOne;
     if (v9 == null || Object.prototype.hasOwnProperty.call(s, "returnsOne")) {
       v1 = v9;
     }
-    v0 = v2.undefined = v1;
+    v0 = v2.hasOwnProperty = v1;
   }
   v10 = s.returnsOne;
   if (v10 == null || Object.prototype.hasOwnProperty.call(s, "returnsOne")) {

@@ -311,8 +311,8 @@ describe("expressions", function () {
 				const u2 = {}.hasOwnProperty("test");
 				expect(u1).to.equal(false);
 				expect(u2).to.equal(false);
-				expect(myErr.message).to.equal(
-					"Cannot set properties of undefined (setting 'hasOwnProperty')"
+				expect(myErr).to.equal(
+					undefined
 				);
 			});
 		});
