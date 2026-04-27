@@ -269,7 +269,7 @@ describe("expressions", function () {
 			it.only("should not be able to rewrite hasOwnProperty", function () {
 				const x1 = {};
 				const u1 = x1.hasOwnProperty("test");
-				console.log(JSON.stringify({"u1": u1}));
+				console.log(JSON.stringify({ u1: u1 }));
 
 				const res = compile(`[
   Object = ({
@@ -293,15 +293,13 @@ FunctionPrototype.call))
   Object.defineProperty(FunctionPrototype, "constructor", {
     set: functionConstructorSetterCalled.resolve,
   })
-]`)(
-{
-  returnsOne: () => 1,
-}
-);
-				console.log(JSON.stringify({"res": res}));
+]`)({
+					returnsOne: () => 1,
+				});
+				console.log(JSON.stringify({ res: res }));
 				const x = {};
 				const u2 = x.hasOwnProperty("test");
-				console.log(JSON.stringify({"u2": u2}));
+				console.log(JSON.stringify({ u2: u2 }));
 			});
 		});
 
