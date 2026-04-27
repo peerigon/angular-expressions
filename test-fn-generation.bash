@@ -12,9 +12,3 @@ echo "function plus(a,b) { return a + b }
 $c"  >gen-code-eslint/code.js
 
 npx tsc gen-code-eslint/code.js --allowJs --checkJs --noEmit
-# cd gen-code-eslint
-# ../node_modules/.bin/eslint --config eslint.config.mjs code.js
-
-# echo "lint ok"
-
-
