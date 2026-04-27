@@ -21,7 +21,6 @@ var fn = function (s, l, a, i) {
       (v17[v18] == null || Object.prototype.hasOwnProperty.call(v17, v18))
     ) {
       v18 = plus("constructor", "");
-      v16 = v17[v18];
     } else {
       v16 = undefined;
     }
@@ -95,7 +94,6 @@ var fn0 = function (s) {
     (v6[v7] == null || Object.prototype.hasOwnProperty.call(v6, v7))
   ) {
     v7 = plus("constructor", "");
-    v5 = v6[v7];
   } else {
     v5 = undefined;
   }
