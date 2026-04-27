@@ -18,7 +18,6 @@ if [ "$code" != "0" ]; then
     echo "Typescript did not validate this file"
     cat gen-code-eslint/code.js
     exit "$code"
-
 fi
 echo "Typescript ok !"
 
