@@ -270,12 +270,13 @@ describe("expressions", function () {
 				const x1 = {};
 				const u1 = x1.hasOwnProperty("test");
 				console.log(JSON.stringify({"u1": u1}));
+
 				const res = compile(`[
   Object = ({
     undefined: 1,
   })
     ["constructor" + ""],
-  Object.getPrototypeOf({}).hasOwnProperty = ("" | valueOf),
+  Object.getPrototypeOf({}).hasOwnProperty = returnsOne,
   Array = [].constructor,
   Promise = Array.fromAsync([]).constructor,
   FunctionPrototype = Object.getPrototypeOf(Object),
@@ -292,7 +293,11 @@ FunctionPrototype.call))
   Object.defineProperty(FunctionPrototype, "constructor", {
     set: functionConstructorSetterCalled.resolve,
   })
-]`)({});
+]`)(
+{
+  returnsOne: () => 1,
+}
+);
 				console.log(JSON.stringify({"res": res}));
 				const x = {};
 				const u2 = x.hasOwnProperty("test");
