@@ -293,7 +293,7 @@ describe("expressions", function () {
 				);
 			});
 
-			it.only("should not be able to rewrite hasOwnProperty with csp: false", function () {
+			it("should not be able to rewrite hasOwnProperty with csp: false", function () {
 				const u1 = {}.hasOwnProperty("test");
 				let myErr;
 				try {
@@ -800,7 +800,7 @@ describe("expressions", function () {
 					expect(scope.a.b.c).to.equal(123);
 				});
 
-				it("should work for expressions with brackets in the middle", function () {
+				it.only("should work for expressions with brackets in the middle", function () {
 					var fn = compile('a["b"].c');
 
 					fn.assign(scope, 123);
