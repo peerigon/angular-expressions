@@ -306,7 +306,6 @@ describe("expressions", function () {
 					});
 				} catch (e) {
 					myErr = e;
-					/* handle error */
 				}
 				const u2 = {}.hasOwnProperty("test");
 				expect(u1).to.equal(false);
