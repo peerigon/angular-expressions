@@ -270,11 +270,7 @@ describe("expressions", function () {
 				const u1 = {}.hasOwnProperty("test");
 				console.log(JSON.stringify({"u1": u1}));
 				const res = compile(`[
-				  Object = ({
-					undefined: 1,
-				  })
-					["constructor" + ""],
-				  Object.getPrototypeOf({}).hasOwnProperty = returnsOne,
+				  {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne,
 				]`)({
 					returnsOne: () => 1,
 				});
