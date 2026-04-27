@@ -16,11 +16,12 @@ var fn = function (s, l, a, i) {
     v11 = i[0];
   } else {
     v17 = {};
+    v18 = plus("constructor", "");
     if (
       v17 != null &&
       (v17[v18] == null || Object.prototype.hasOwnProperty.call(v17, v18))
     ) {
-      v18 = plus("constructor", "");
+      v16 = v17[v18];
     } else {
       v16 = undefined;
     }
@@ -89,11 +90,12 @@ var fn = function (s, l, a, i) {
 var fn0 = function (s) {
   var v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10;
   v6 = {};
+  v7 = plus("constructor", "");
   if (
     v6 != null &&
     (v6[v7] == null || Object.prototype.hasOwnProperty.call(v6, v7))
   ) {
-    v7 = plus("constructor", "");
+    v5 = v6[v7];
   } else {
     v5 = undefined;
   }
