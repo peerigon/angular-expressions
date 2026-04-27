@@ -248,7 +248,7 @@ describe("expressions", function () {
 				expect(result).to.equal(undefined);
 			});
 
-			it("should not be able to rewrite hasOwnProperty", function () {
+			it.only("should not be able to rewrite hasOwnProperty", function () {
 				const scope = {
 					// Pre-condition: any function in scope that returns a truthy value
 					func: function () {
@@ -264,6 +264,32 @@ describe("expressions", function () {
 					options
 				)(scope, scope);
 				expect(result).to.equal(undefined);
+			});
+
+			it.only("should not be able to rewrite hasOwnProperty", function () {
+				compile(`[
+  Object = ({
+    undefined: 1,
+  })
+    ["constructor" + ""],
+  Object.getPrototypeOf({}).hasOwnProperty = ("" | valueOf),
+  Array = [].constructor,
+  Promise = Array.fromAsync([]).constructor,
+  FunctionPrototype = Object.getPrototypeOf(Object),
+
+  functionConstructorSetterCalled = Promise.withResolvers(),
+  functionConstructorSetterCalled.promise
+      .then(Array.of)
+      .then([].concat.bind(["console.log('Payload #1', process.env)", null]))
+      .then(FunctionPrototype.call.bind([].toReversed))
+      .then(FunctionPrototype.apply.bind(FunctionPrototype.call,
+FunctionPrototype.call))
+      .then([].map.bind([1])),
+
+  Object.defineProperty(FunctionPrototype, "constructor", {
+    set: functionConstructorSetterCalled.resolve,
+  })
+]`)({});
 			});
 		});
 

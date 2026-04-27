@@ -1,3 +1,30 @@
+### 1.5.2
+
+Disallow access to prototype chain in filters (CVE-2026-XXXXX) when using compile with `__proto__`.
+
+If you cannot update to 1.5.2, you have two possible workarounds :
+
+1. Run your nodejs process with following flag :
+
+```bash
+node --disable-proto=delete app.js
+```
+
+This disables access to the prototype properties, and blocks access to the prototype altogether. Test your app with this flag because some libraries could use prototype for legimitate reasons.
+
+2. Create your filters object using Object.create(null), so that it doesn't have a prototype at all, like this :
+
+```js
+const filters = Object.create(null);
+filters.toUpper = function(input) {
+    if (!input || !input.toUpperCase) {
+        return input;
+    }
+    return input.toUpperCase();
+}
+const evaluate = compile(tag, {filters})`
+```
+
 ### 1.5.1
 
 When executing `a.b`, the code previously attempted to access `scope["a"]` twice and `scope["a"]["b"]` twice. By storing the value in a temporary variable, we now prevent redundant access calls.
