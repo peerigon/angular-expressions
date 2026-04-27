@@ -267,11 +267,11 @@ describe("expressions", function () {
 				expect(result).to.equal(undefined);
 			});
 
-			it.only("should not be able to rewrite hasOwnProperty with csp: true", function () {
+			it("should not be able to rewrite hasOwnProperty with csp: true", function () {
 				const u1 = {}.hasOwnProperty("test");
 				let myErr;
 				try {
-					const res = compile(
+					compile(
 						`[
 				  {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne,
 				]`,
