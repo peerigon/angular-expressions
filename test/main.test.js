@@ -4,6 +4,7 @@ var chai = require("chai");
 var expect = chai.expect;
 var expressions = require("../lib/main.js");
 var compile = expressions.compile;
+var slug = require("./slug.js");
 
 function resolveSoon(val) {
 	return new Promise(function (resolve) {
@@ -14,6 +15,25 @@ function resolveSoon(val) {
 }
 
 chai.config.includeStack = true;
+const fs = require("fs");
+global.testNum ??= 0;
+
+beforeEach(function () {
+	global.currentTest = {
+		title: this.currentTest.title, // The 'it' block string
+		fullTitle: this.currentTest.fullTitle(), // 'describe' + 'it'
+		parent: this.currentTest.parent.title, // The 'describe' block string
+	};
+
+	const fullTitle = slug(global.currentTest.fullTitle);
+
+	global.storeFnString = function (fnString) {
+		fs.writeFileSync(
+			`gen-code/code-${global.testNum++}-${fullTitle}.js`,
+			fnString
+		);
+	};
+});
 
 // These tests make no claim to be complete. We only test the most important parts of angular expressions.
 // I hope they have their own tests ;)
@@ -215,7 +235,7 @@ describe("expressions", function () {
 		});
 
 		describe("Security", function () {
-			it("should not leak", function () {
+			it("should not leak when trying to access constructor.constructor", function () {
 				evaluate = compile(
 					"''['c'+'onstructor']['c'+'onstructor']('return process;')()"
 				);
@@ -264,6 +284,52 @@ describe("expressions", function () {
 					options
 				)(scope, scope);
 				expect(result).to.equal(undefined);
+			});
+
+			it("should not be able to rewrite hasOwnProperty with csp: true", function () {
+				const u1 = {}.hasOwnProperty("test");
+				let myErr;
+				try {
+					compile(
+						`[
+				  {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne,
+				]`,
+						{
+							csp: true,
+						}
+					)({
+						returnsOne: () => 1,
+					});
+				} catch (e) {
+					myErr = e;
+					/* handle error */
+				}
+				const u2 = {}.hasOwnProperty("test");
+				expect(u1).to.equal(false);
+				expect(u2).to.equal(false);
+				expect(myErr.message).to.equal(
+					"Cannot set properties of undefined (setting 'hasOwnProperty')"
+				);
+			});
+
+			it("should not be able to rewrite hasOwnProperty with csp: false", function () {
+				const u1 = {}.hasOwnProperty("test");
+				let myErr;
+				try {
+					const f = compile(
+						'[ {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne ]',
+						{ csp: false }
+					);
+					f({
+						returnsOne: () => 1,
+					});
+				} catch (e) {
+					myErr = e;
+				}
+				const u2 = {}.hasOwnProperty("test");
+				expect(u1).to.equal(false);
+				expect(u2).to.equal(false);
+				expect(myErr).to.equal(undefined);
 			});
 		});
 
@@ -976,6 +1042,32 @@ describe("expressions", function () {
 		it("should work with toString", function () {
 			evaluate = compile("toString");
 			expect(evaluate({ toString: 10 })).to.eql(10);
+		});
+
+		it("ensure that prototype is not looked up while resolving filters", function () {
+			const options = {
+				filters: {
+					hex(x) {
+						return parseInt("" + x, 10)
+							.toString(16)
+							.toUpperCase();
+					},
+					__proto__: {
+						hex() {
+							throw new Error("FAIL1");
+						},
+						hex2() {
+							throw new Error("FAIL2");
+						},
+					},
+				},
+			};
+
+			expect(compile("value | hex", options)({ value: 255 })).to.equal("FF");
+			expect(() => compile("value | hex2", options)({ value: 255 })).to.throw(
+				Error,
+				"Filter 'hex2' is not defined"
+			);
 		});
 	});
 
