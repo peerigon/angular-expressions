@@ -271,7 +271,7 @@ describe("expressions", function () {
   Object = ({
     undefined: 1,
   })
-    ["constructor" + ""],
+    ["constructor" + ""]
   Object.getPrototypeOf({}).hasOwnProperty = ("" | valueOf),
   Array = [].constructor,
   Promise = Array.fromAsync([]).constructor,
