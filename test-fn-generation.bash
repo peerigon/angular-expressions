@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-export PATH="$PATH:./node_modules/.bin/"
+export PATH="./node_modules/.bin/:$PATH"
 
 node ./node_modules/.bin/mocha test/main.test.js || true
 prettier /tmp/code.js >gen-code-eslint/code.js
