@@ -298,9 +298,9 @@ describe("expressions", function () {
 				let myErr;
 				try {
 					const f = compile(
-						`[ {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne ]`,
+						'[ {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne ]',
 						{ csp: false }
-					)
+					);
 					f({
 						returnsOne: () => 1,
 					});
@@ -310,9 +310,7 @@ describe("expressions", function () {
 				const u2 = {}.hasOwnProperty("test");
 				expect(u1).to.equal(false);
 				expect(u2).to.equal(false);
-				expect(myErr).to.equal(
-					undefined
-				);
+				expect(myErr).to.equal(undefined);
 			});
 		});
 
