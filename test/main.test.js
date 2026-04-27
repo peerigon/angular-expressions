@@ -297,10 +297,12 @@ describe("expressions", function () {
 				const u1 = {}.hasOwnProperty("test");
 				let myErr;
 				try {
-					compile(
+					const f = compile(
 						`[ {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne ]`,
 						{ csp: false }
-					)({
+					)
+					console.log(JSON.stringify({"f.toString()": f.toString()}));
+					f({
 						returnsOne: () => 1,
 					});
 				} catch (e) {
