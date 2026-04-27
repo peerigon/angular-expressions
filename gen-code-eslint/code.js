@@ -1,4 +1,4 @@
-"use strict";
+function plus(a,b) { return a + b }
 var fn = function (s, l, a, i) {
   var v11,
     v12,
@@ -144,4 +144,3 @@ var fn0 = function (s) {
   return v0;
 };
 fn.inputs = [fn0];
-return fn;
