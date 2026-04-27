@@ -301,7 +301,6 @@ describe("expressions", function () {
 						`[ {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne ]`,
 						{ csp: false }
 					)
-					console.log(JSON.stringify({"f.toString()": f.toString()}));
 					f({
 						returnsOne: () => 1,
 					});
