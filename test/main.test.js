@@ -1,4 +1,5 @@
 "use strict";
+const util = require("util");
 
 var chai = require("chai");
 var expect = chai.expect;
@@ -266,17 +267,56 @@ describe("expressions", function () {
 				expect(result).to.equal(undefined);
 			});
 
-			it.only("should not be able to rewrite hasOwnProperty", function () {
+			it.only("should not be able to rewrite hasOwnProperty with csp: true", function () {
 				const u1 = {}.hasOwnProperty("test");
 				console.log(JSON.stringify({ u1: u1 }));
-				const res = compile(`[
+				let myErr;
+				try {
+					const res = compile(
+						`[
 				  {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne,
-				]`)({
-					returnsOne: () => 1,
-				});
+				]`,
+						{
+							csp: true,
+						}
+					)({
+						returnsOne: () => 1,
+					});
+				} catch (e) {
+					myErr = e;
+					/* handle error */
+				}
 				const u2 = {}.hasOwnProperty("test");
-				expect(u1).to.equal(false)
-				expect(u2).to.equal(false)
+				expect(u1).to.equal(false);
+				expect(u2).to.equal(false);
+				expect(myErr.message).to.equal(
+					"Cannot set properties of undefined (setting 'hasOwnProperty')"
+				);
+			});
+
+			it.only("should not be able to rewrite hasOwnProperty with csp: false", function () {
+				const u1 = {}.hasOwnProperty("test");
+				console.log(JSON.stringify({ u1: u1 }));
+				let myErr;
+				try {
+					const res = compile(
+						`[
+				  {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne,
+				]`,
+						{ csp: false }
+					)({
+						returnsOne: () => 1,
+					});
+				} catch (e) {
+					myErr = e;
+					/* handle error */
+				}
+				const u2 = {}.hasOwnProperty("test");
+				expect(u1).to.equal(false);
+				expect(u2).to.equal(false);
+				expect(myErr.message).to.equal(
+					"Cannot set properties of undefined (setting 'hasOwnProperty')"
+				);
 			});
 		});
 
