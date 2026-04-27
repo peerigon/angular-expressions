@@ -152,45 +152,26 @@ There is no `dist` build because it's not 2005 anymore. Use a module bundler lik
 
 <br />
 
-## Security
+# Security
 
-The code of angular was not secured from reading prototype, and since version 1.0.1 of angular-expressions, the module disallows reading properties that are not ownProperties. See [this blog post](http://blog.angularjs.org/2016/09/angular-16-expression-sandbox-removal.html) for more details about the sandbox that got removed completely in angular 1.6.
+## Security recommendation
 
-Comment from `angular.js/src/ng/parse.js`:
+If you are running in Node.JS, we recommend you to use the following flag in your node command so that access to `__proto__` is not possible.
 
----
+This puts an additional security layer which makes vulnerabilities much less
+likely to affect you.
 
-Angular expressions are generally considered safe because these expressions only have direct
-access to \$scope and locals. However, one can obtain the ability to execute arbitrary JS code by
-obtaining a reference to native JS functions such as the Function constructor.
+The flag can be set like this :
 
-As an example, consider the following Angular expression:
-
-```javascript
-{}.toString.constructor(alert("evil JS code"))
+```bash
+node --disable-proto=delete app.js
 ```
 
-We want to prevent this type of access. For the sake of performance, during the lexing phase we
-disallow any "dotted" access to any member named "constructor".
+If you're using some libraries that still rely on Prototype, this could break your application.
 
-For reflective calls (a[b]) we check that the value of the lookup is not the Function constructor
-while evaluating the expression, which is a stronger but more expensive test. Since reflective
-calls are expensive anyway, this is not such a big deal compared to static dereferencing.
-This sandboxing technique is not perfect and doesn't aim to be. The goal is to prevent exploits
-against the expression language, but not to prevent exploits that were enabled by exposing
-sensitive JavaScript or browser apis on Scope. Exposing such objects on a Scope is never a good
-practice and therefore we are not even trying to protect against interaction with an object
-explicitly exposed in this way.
+## User Precaution
 
-A developer could foil the name check by aliasing the Function constructor under a different
-name on the scope.
-
-In general, it is not possible to access a Window object from an angular expression unless a
-window or some DOM object that has a reference to window is published onto a Scope.
-
----
-
-<br />
+When providing data or filters to the library, ensure that you do not include "eval", "Function", or any filters that internally invoke these functions, as doing so could expose your users to the risk of Remote Code Execution (RCE).
 
 ## Authorship
 
