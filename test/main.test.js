@@ -298,9 +298,7 @@ describe("expressions", function () {
 				let myErr;
 				try {
 					compile(
-						`[
-				  {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne,
-				]`,
+						`[ {}["constructor" + ""].getPrototypeOf({}).hasOwnProperty = returnsOne ]`,
 						{ csp: false }
 					)({
 						returnsOne: () => 1,
