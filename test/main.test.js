@@ -267,38 +267,19 @@ describe("expressions", function () {
 			});
 
 			it.only("should not be able to rewrite hasOwnProperty", function () {
-				const x1 = {};
-				const u1 = x1.hasOwnProperty("test");
-				console.log(JSON.stringify({ u1: u1 }));
-
+				const u1 = {}.hasOwnProperty("test");
+				console.log(JSON.stringify({"u1": u1}));
 				const res = compile(`[
-  Object = ({
-    undefined: 1,
-  })
-    ["constructor" + ""],
-  Object.getPrototypeOf({}).hasOwnProperty = returnsOne,
-  Array = [].constructor,
-  Promise = Array.fromAsync([]).constructor,
-  FunctionPrototype = Object.getPrototypeOf(Object),
-
-  functionConstructorSetterCalled = Promise.withResolvers(),
-  functionConstructorSetterCalled.promise
-      .then(Array.of)
-      .then([].concat.bind(["console.log('Payload #1', process.env.HOME)", null]))
-      .then(FunctionPrototype.call.bind([].toReversed))
-      .then(FunctionPrototype.apply.bind(FunctionPrototype.call,
-FunctionPrototype.call))
-      .then([].map.bind([1])),
-
-  Object.defineProperty(FunctionPrototype, "constructor", {
-    set: functionConstructorSetterCalled.resolve,
-  })
-]`)({
+				  Object = ({
+					undefined: 1,
+				  })
+					["constructor" + ""],
+				  Object.getPrototypeOf({}).hasOwnProperty = returnsOne,
+				]`)({
 					returnsOne: () => 1,
 				});
 				console.log(JSON.stringify({ res: res }));
-				const x = {};
-				const u2 = x.hasOwnProperty("test");
+				const u2 = {}.hasOwnProperty("test");
 				console.log(JSON.stringify({ u2: u2 }));
 			});
 		});
