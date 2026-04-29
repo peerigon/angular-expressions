@@ -29,7 +29,7 @@ test() {
         const \$filter = Object.create(null);
         function plus(a,b) { return a + b }
         var nativeHasOwn = Object.prototype.hasOwnProperty;
-        var nativeCall = Function.prototype.call;
+        var nativeCall = Function.prototype.call; var \$call = Function.prototype.call.bind(Function.prototype.call);
         // This creates a function that effectively does:
         // nativeCall.call(nativeHasOwn, obj, key)
         /**

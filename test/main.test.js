@@ -18,6 +18,22 @@ chai.config.includeStack = true;
 const fs = require("fs");
 global.testNum ??= 0;
 
+function getDuplicates(arr) {
+	const duplicates = [];
+	const hash = {},
+		result = [];
+	for (let i = 0, l = arr.length; i < l; ++i) {
+		if (!hash[arr[i]]) {
+			hash[arr[i]] = true;
+			result.push(arr[i]);
+		} else {
+			duplicates.push(arr[i]);
+		}
+	}
+	return duplicates;
+}
+
+const titles = [];
 beforeEach(function () {
 	global.currentTest = {
 		title: this.currentTest.title, // The 'it' block string
@@ -26,6 +42,7 @@ beforeEach(function () {
 	};
 
 	const fullTitle = slug(global.currentTest.fullTitle);
+	titles.push(fullTitle);
 
 	global.storeFnString = function (fnString) {
 		fs.writeFileSync(
@@ -33,6 +50,14 @@ beforeEach(function () {
 			fnString
 		);
 	};
+});
+after(function name() {
+	const duplicates = getDuplicates(titles);
+	if (duplicates.length > 0) {
+		/* eslint-disable-next-line no-console */
+		console.error(duplicates);
+		throw new Error("Found duplicates in the test names");
+	}
 });
 
 // These tests make no claim to be complete. We only test the most important parts of angular expressions.
@@ -307,9 +332,7 @@ describe("expressions", function () {
 				const u2 = {}.hasOwnProperty("test");
 				expect(u1).to.equal(false);
 				expect(u2).to.equal(false);
-				expect(myErr).to.equal(
-					undefined
-				);
+				expect(myErr).to.equal(undefined);
 			});
 
 			it("should not be able to rewrite hasOwnProperty with csp: false", function () {
@@ -330,6 +353,30 @@ describe("expressions", function () {
 				expect(u1).to.equal(false);
 				expect(u2).to.equal(false);
 				expect(myErr).to.equal(undefined);
+			});
+
+			it("should not be possible to access constructor or other private properties with complex expressions", function () {
+				expect(compile('this["constructor" + ""]')({})).to.equal(undefined);
+				expect(compile('O = this["constructor" + ""]')({})).to.equal(undefined);
+				expect(compile('(O = this["constructor" + ""])')({})).to.equal(
+					undefined
+				);
+				expect(compile('(O = this[("constructor" + "") + ""])')({})).to.equal(
+					undefined
+				);
+				expect(compile('{O: this["constructor" + ""]}.O')({})).to.equal(
+					undefined
+				);
+				expect(compile('[this["constructor" + ""]][0]')({})).to.equal(
+					undefined
+				);
+				expect(compile('[O = this["constructor" + ""]][0]')({})).to.equal(
+					undefined
+				);
+				expect(compile("constructor")({})).to.equal(undefined);
+				expect(compile("Object")({})).to.equal(undefined);
+				expect(compile("Array")({})).to.equal(undefined);
+				expect(compile('"".toString')({})).to.equal(undefined);
 			});
 		});
 
@@ -424,32 +471,32 @@ describe("expressions", function () {
 		});
 
 		describe("when evaluating operators", function () {
-			it("should return the expected result when using +", function () {
+			it("should return the expected result when using + plus", function () {
 				evaluate = compile("1 + 1");
 				expect(evaluate()).to.equal(2);
 			});
 
-			it("should return the expected result when using -", function () {
+			it("should return the expected result when using - minus", function () {
 				evaluate = compile("1 - 1");
 				expect(evaluate()).to.equal(0);
 			});
 
-			it("should return the expected result when using *", function () {
+			it("should return the expected result when using * times", function () {
 				evaluate = compile("2 * 2");
 				expect(evaluate()).to.equal(4);
 			});
 
-			it("should return the expected result when using /", function () {
+			it("should return the expected result when using / divide", function () {
 				evaluate = compile("4 / 2");
 				expect(evaluate()).to.equal(2);
 			});
 
-			it("should return the expected result when using %", function () {
+			it("should return the expected result when using % modulo", function () {
 				evaluate = compile("3 % 2");
 				expect(evaluate()).to.equal(1);
 			});
 
-			it("should return the expected result when using &&", function () {
+			it("should return the expected result when using && logical and", function () {
 				evaluate = compile("true && true");
 				expect(evaluate()).to.equal(true);
 				evaluate = compile("true && false");
@@ -458,7 +505,7 @@ describe("expressions", function () {
 				expect(evaluate()).to.equal(false);
 			});
 
-			it("should return the expected result when using ||", function () {
+			it("should return the expected result when using || logical or", function () {
 				evaluate = compile("true || true");
 				expect(evaluate()).to.equal(true);
 				evaluate = compile("true || false");
@@ -581,7 +628,7 @@ describe("expressions", function () {
 				expect(evaluate(scope)).to.equal("found");
 			});
 
-			it("should return the expected result when using !", function () {
+			it("should return the expected result when using ! logical not", function () {
 				evaluate = compile("!true");
 				expect(evaluate()).to.equal(false);
 				evaluate = compile("!false");
@@ -638,7 +685,7 @@ describe("expressions", function () {
 		});
 
 		describe("when evaluating syntactical errors", function () {
-			it("should give a readable error message", function () {
+			it("should give a readable error message - unterminated string", function () {
 				expect(function () {
 					compile("'unterminated string");
 				}).to.throw(
@@ -646,7 +693,7 @@ describe("expressions", function () {
 				);
 			});
 
-			it("should give a readable error message", function () {
+			it("should give a readable error message when trying to assign value to integer", function () {
 				expect(function () {
 					compile("3 = 4");
 				}).to.throw(
@@ -914,35 +961,35 @@ describe("expressions", function () {
 
 	describe("Equality", function () {
 		let evaluate;
-		it("should work with ===", function () {
+		it("should work with === eqeqeq", function () {
 			evaluate = compile("a === b");
 			expect(evaluate({ a: true, b: true })).to.eql(true);
 		});
-		it("should work with ===", function () {
+		it("should work with === eqeqeq with bool/int", function () {
 			evaluate = compile("a === b");
 			expect(evaluate({ a: true, b: 1 })).to.eql(false);
 		});
-		it("should work with ==", function () {
+		it("should work with == eqeq bool/bool", function () {
 			evaluate = compile("a == b");
 			expect(evaluate({ a: true, b: true })).to.eql(true);
 		});
-		it("should work with ==", function () {
+		it("should work with ==eqeq bool/int", function () {
 			evaluate = compile("a == b");
 			expect(evaluate({ a: true, b: 1 })).to.eql(true);
 		});
-		it("should work with !==", function () {
+		it("should work with !== noteqeqeq with string/bool", function () {
 			evaluate = compile("a !== b");
 			expect(evaluate({ a: "8", b: 8 })).to.eql(true);
 		});
-		it("should work with !==", function () {
+		it("should work with !==noteqeqeq with bool/bool", function () {
 			evaluate = compile("a !== b");
 			expect(evaluate({ a: true, b: true })).to.eql(false);
 		});
-		it("should work with !=", function () {
+		it("should work with !=noteqeq with bool/bool", function () {
 			evaluate = compile("a != b");
 			expect(evaluate({ a: true, b: true })).to.eql(false);
 		});
-		it("should work with !=", function () {
+		it("should work with !=noteqeq with string/int", function () {
 			evaluate = compile("a != b");
 			expect(evaluate({ a: "8", b: 8 })).to.eql(false);
 		});
