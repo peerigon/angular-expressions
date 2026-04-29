@@ -307,8 +307,8 @@ describe("expressions", function () {
 				const u2 = {}.hasOwnProperty("test");
 				expect(u1).to.equal(false);
 				expect(u2).to.equal(false);
-				expect(myErr.message).to.equal(
-					"Cannot set properties of undefined (setting 'hasOwnProperty')"
+				expect(myErr).to.equal(
+					undefined
 				);
 			});
 
@@ -870,6 +870,21 @@ describe("expressions", function () {
 			});
 
 			expect(result).to.equal(4);
+		});
+
+		it("should allow to use csp:true for function calls", function () {
+			const result = compile("x= {}; x(1,2,3)", {
+				csp: true,
+			})({});
+			expect(result).to.equal(undefined);
+		});
+
+		it("should allow to use csp:true for complex function calls", function () {
+			const result = compile("x= {}; x.foo={}; x.foo(1,2,3)", {
+				csp: true,
+			})({});
+
+			expect(result).to.equal(undefined);
 		});
 
 		it("should return the scope even when the 'this' keyword is used", function () {
