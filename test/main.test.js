@@ -356,27 +356,27 @@ describe("expressions", function () {
 			});
 
 			it("should not be possible to access constructor or other private properties with complex expressions", function () {
-				expect(compile('this["constructor" + ""]')({})).to.equal(undefined);
-				expect(compile('O = this["constructor" + ""]')({})).to.equal(undefined);
-				expect(compile('(O = this["constructor" + ""])')({})).to.equal(
-					undefined
-				);
-				expect(compile('(O = this[("constructor" + "") + ""])')({})).to.equal(
-					undefined
-				);
-				expect(compile('{O: this["constructor" + ""]}.O')({})).to.equal(
-					undefined
-				);
-				expect(compile('[this["constructor" + ""]][0]')({})).to.equal(
-					undefined
-				);
-				expect(compile('[O = this["constructor" + ""]][0]')({})).to.equal(
-					undefined
-				);
-				expect(compile("constructor")({})).to.equal(undefined);
-				expect(compile("Object")({})).to.equal(undefined);
-				expect(compile("Array")({})).to.equal(undefined);
-				expect(compile('"".toString')({})).to.equal(undefined);
+				const testCases = [
+					'this["constructor" + ""]',
+					'this["constructor" + ""]()',
+					'O = this["constructor" + ""]',
+					'(O = this["constructor" + ""])',
+					'(O = this[("constructor" + "") + ""])',
+					'{O: this["constructor" + ""]}.O',
+					'[this["constructor" + ""]][0]',
+					'[O = this["constructor" + ""]][0]',
+					"constructor",
+					"Object",
+					"({}+[])[0][1]",
+					"undef",
+					"undefined",
+					"Array",
+					'"".toString',
+				];
+				for (const testCase of testCases) {
+					expect(compile(testCase)({})).to.equal(undefined);
+					expect(compile(testCase, { csp: true })({})).to.equal(undefined);
+				}
 			});
 		});
 
@@ -1145,6 +1145,54 @@ describe("expressions", function () {
 			evaluate = compile("a = a + 1; a");
 			expect(evaluate({ a: 0 })).to.eql(1);
 			expect(evaluate({ a: 2 })).to.eql(3);
+		});
+	});
+
+	describe("DisabledSyntaxes", function () {
+		it("should be possible to disallow call expressions", function () {
+			expect(() =>
+				compile('a("")', {
+					disabledSyntaxes: ["CallExpression"],
+				})
+			).to.throw(Error, '"CallExpression" is blocked by disabledSyntaxes');
+
+			expect(() =>
+				compile('[a("")]', {
+					disabledSyntaxes: ["CallExpression"],
+				})
+			).to.throw(Error, '"CallExpression" is blocked by disabledSyntaxes');
+
+			expect(() =>
+				compile('["".foo.bar("")]', {
+					disabledSyntaxes: ["CallExpression"],
+				})
+			).to.throw(Error, '"CallExpression" is blocked by disabledSyntaxes');
+		});
+
+		it("should still be possible to run a | b if disabledSyntaxes:CallExpression", function () {
+			expect(
+				compile("a | b", {
+					disabledSyntaxes: ["CallExpression"],
+					filters: {
+						b: function () {
+							return 3;
+						},
+					},
+				})(1)
+			).to.equal(3);
+		});
+
+		it("should be possible to disable filters", function () {
+			expect(() =>
+				compile("a | b", {
+					disabledSyntaxes: ["FilterExpression"],
+					filters: {
+						b: function () {
+							return 3;
+						},
+					},
+				})
+			).to.throw(Error, '"FilterExpression" is blocked by disabledSyntaxes');
 		});
 	});
 });
