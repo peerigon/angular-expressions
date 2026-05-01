@@ -819,6 +819,29 @@ describe("expressions", function () {
 					"the quick fox jumps over the brown log"
 				);
 			});
+
+			it("should bind this in filter to the function itself : csp:true or false", function () {
+				const filters = {
+					toDollars: function (input) {
+						expect(typeof this).to.equal("function");
+						expect(this.name).to.equal("toDollars");
+						const result = input.toFixed(2);
+						return `${result}$`;
+					},
+				};
+				const cache = {};
+
+				compile("1.2345 | toDollars", {
+					filters,
+					cache,
+					csp: false,
+				})();
+				compile("1.2345 | toDollars", {
+					filters,
+					cache,
+					csp: true,
+				})();
+			});
 		});
 
 		describe("when using argument options.cache", function () {
