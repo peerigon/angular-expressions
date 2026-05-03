@@ -7,6 +7,7 @@ function getFilters(tag: any) {
   return filters[tag];
 }
 
+new Parser(new Lexer(), getFilters);
 const ppp = new Parser(new Lexer(), getFilters, { csp: true });
 const f = expressions.compile("x + 1");
 const myResult = f.assign({}, 123);
@@ -36,4 +37,19 @@ expressions.compile("number | square", {
     square: (input: number) => input * input,
   },
   cache: {},
+});
+
+expressions.compile("number | square", {
+  filters: {
+    square: (input: number) => input * input,
+  },
+  disabledSyntaxes: ["CallExpression"],
+  cache: {},
+  handleThis: false,
+});
+
+new Parser(new Lexer(), getFilters, {
+  csp: true,
+  disabledSyntaxes: ["CallExpression"],
+  handleThis: true,
 });

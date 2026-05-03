@@ -8,6 +8,8 @@ interface ParserOptions {
   literals?: {
     [x: string]: any;
   };
+  disabledSyntaxes?: string[];
+  handleThis?: boolean;
 }
 
 interface Filters {
@@ -21,6 +23,8 @@ interface Cache {
 interface CompileFuncOptions extends LexerOptions {
   filters?: Filters;
   cache?: Cache;
+  handleThis?: boolean;
+  disabledSyntaxes?: string[];
 }
 
 type EvaluatorFunc = {
