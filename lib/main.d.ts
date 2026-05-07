@@ -3,12 +3,32 @@ interface LexerOptions {
   isIdentifierContinue?: (char: string) => boolean;
 }
 
+type SyntaxType =
+  | "Program"
+  | "ExpressionStatement"
+  | "AssignmentExpression"
+  | "ConditionalExpression"
+  | "LogicalExpression"
+  | "BinaryExpression"
+  | "UnaryExpression"
+  | "CallExpression"
+  | "FilterExpression"
+  | "MemberExpression"
+  | "Identifier"
+  | "Literal"
+  | "ArrayExpression"
+  | "Property"
+  | "ObjectExpression"
+  | "ThisExpression"
+  | "LocalsExpression"
+  | "NGValueParameter";
+
 interface ParserOptions {
   csp?: boolean;
   literals?: {
     [x: string]: any;
   };
-  disabledSyntaxes?: string[];
+  disabledSyntaxes?: SyntaxType[];
   handleThis?: boolean;
 }
 
@@ -20,11 +40,12 @@ interface Cache {
   [x: string]: any;
 }
 
+// How to define all disabledSyntaxes using a set of strings, like disabledSyntaxes: string[]{"CallExpression", "FilterExpression"}
 interface CompileFuncOptions extends LexerOptions {
   filters?: Filters;
   cache?: Cache;
   handleThis?: boolean;
-  disabledSyntaxes?: string[];
+  disabledSyntaxes?: SyntaxType[];
 }
 
 type EvaluatorFunc = {

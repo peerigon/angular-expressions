@@ -1217,5 +1217,22 @@ describe("expressions", function () {
 				})
 			).to.throw(Error, '"FilterExpression" is blocked by disabledSyntaxes');
 		});
+
+		it("should block if making typo for DisabledSyntaxes", function () {
+			expect(() =>
+				compile("a | b", {
+					disabledSyntaxes: ["ZooExpression"],
+					filters: {
+						b: function () {
+							return 3;
+						},
+					},
+				})
+			).to.throw(
+				Error,
+				`Invalid syntax in disabledSyntaxes: "ZooExpression"
+Expected one of: ["Program", "ExpressionStatement", "AssignmentExpression", "ConditionalExpression", "LogicalExpression", "BinaryExpression", "UnaryExpression", "CallExpression", "MemberExpression", "Identifier", "Literal", "ArrayExpression", "Property", "ObjectExpression", "ThisExpression", "LocalsExpression", "NGValueParameter", "FilterExpression"]`
+			);
+		});
 	});
 });

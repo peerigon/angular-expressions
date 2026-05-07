@@ -1,5 +1,6 @@
 import expressions from "./main.js";
 import { filters } from "./main.js";
+import { expectError } from "tsd";
 
 const { Parser, Lexer } = expressions;
 
@@ -48,8 +49,31 @@ expressions.compile("number | square", {
   handleThis: false,
 });
 
+expressions.compile("number | square", {
+  filters: {
+    square: (input: number) => input * input,
+  },
+  disabledSyntaxes: ["FilterExpression"],
+  cache: {},
+  handleThis: false,
+});
+
 new Parser(new Lexer(), getFilters, {
   csp: true,
   disabledSyntaxes: ["CallExpression"],
   handleThis: true,
 });
+
+new Parser(new Lexer(), getFilters, {
+  csp: true,
+  disabledSyntaxes: ["FilterExpression"],
+  handleThis: true,
+});
+
+expectError(
+  new Parser(new Lexer(), getFilters, {
+    csp: true,
+    disabledSyntaxes: ["FooExpr"],
+    handleThis: true,
+  })
+);
