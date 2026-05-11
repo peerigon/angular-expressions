@@ -1235,4 +1235,62 @@ Expected one of: ["Program", "ExpressionStatement", "AssignmentExpression", "Con
 			);
 		});
 	});
+
+	describe("Operations on undefined", function () {
+		var evaluate;
+		it("should work with assignment and addition", function () {
+			evaluate = compile("c=a+b;c", { csp: false });
+			const scope = {};
+			expect(evaluate(scope)).to.eql(undefined);
+			expect(Object.keys(scope)).to.eql(["c"]);
+			expect(scope.c).to.eql(undefined);
+		});
+		it("should work with assignment and addition with csp", function () {
+			evaluate = compile("c=a+b;c", { csp: true });
+			const scope = {};
+			expect(evaluate(scope)).to.eql(undefined);
+			expect(Object.keys(scope)).to.eql(["c"]);
+			expect(scope.c).to.eql(undefined);
+		});
+
+		it("should work with addition with csp", function () {
+			evaluate = compile("a+b", { csp: true });
+			expect(evaluate({})).to.eql(undefined);
+		});
+
+		it("should work with addition", function () {
+			evaluate = compile("a+b", { csp: false });
+			expect(evaluate({})).to.eql(undefined);
+		});
+
+		it("should work with subtraction with csp", function () {
+			evaluate = compile("a-b", { csp: true });
+			expect(evaluate({})).to.eql(undefined);
+		});
+
+		it("should work with subtraction", function () {
+			evaluate = compile("a-b", { csp: false });
+			expect(evaluate({})).to.eql(undefined);
+		});
+
+		it("should work with multiplication with csp", function () {
+			evaluate = compile("a*b", { csp: true });
+			expect(evaluate({})).to.eql(undefined);
+		});
+
+		it("should work with multiplication", function () {
+			evaluate = compile("a*b", { csp: false });
+			expect(evaluate({})).to.eql(undefined);
+		});
+
+		it("should work with division with csp", function () {
+			evaluate = compile("a/b", { csp: true });
+			expect(evaluate({})).to.eql(undefined);
+		});
+
+		it("should work with division", function () {
+			evaluate = compile("a/b", { csp: false });
+			expect(evaluate({})).to.eql(undefined);
+		});
+	});
 });

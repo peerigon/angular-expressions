@@ -1,3 +1,11 @@
+### 1.5.3
+
+Make "a+b" return undefined if the scope is `{}` : if a or b is null or undefined.
+
+In previous versions, non-csp mode would return 0, and csp mode would return undefined.
+
+Now "a+b", "a-b", "a\*b", "a/b" all return undefined if on of the values is undefined.
+
 ### 1.5.2
 
 Disallow access to prototype chain in filters (CVE-2026-XXXXX) when using compile with `__proto__`.

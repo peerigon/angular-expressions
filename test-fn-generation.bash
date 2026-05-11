@@ -27,7 +27,7 @@ test() {
         function getStringValue(name) { return name + ''; }
         function ifDefined(v, d) { return typeof v !== 'undefined' ? v : d; }
         const \$filter = Object.create(null);
-        function plus(a,b) { return a + b }
+        function plus(a,b) { return a + b } function minus(a,b) { return a -b } function times(a,b) { return a*b } function divide(a,b) { return a / b }
         var nativeHasOwn = Object.prototype.hasOwnProperty;
         var nativeCall = Function.prototype.call; var \$call = Function.prototype.call.bind(Function.prototype.call);
         // This creates a function that effectively does:
