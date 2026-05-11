@@ -28,6 +28,7 @@
     "chai": "^5.2.0",
     "es-check": "^9.1.4",
     "eslint": "^9.28.0",
+    "eslint-formatter-unix": "^9.0.1",
     "globals": "^16.2.0",
     "mocha": "^11.5.0",
     "prettier": "^3.5.3",
