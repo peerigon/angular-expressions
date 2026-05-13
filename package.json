@@ -10,7 +10,8 @@
     "test:typings": "tsd .",
     "test:fn-generation": "./test-fn-generation.bash",
     "lint": "eslint lib test && prettier lib/*.js test/*.js lib/*.ts *.md --list-different",
-    "lint:fix": "eslint --fix lib test && prettier --write lib/*.js test/*.js *.md lib/*.ts"
+    "lint:fix": "eslint --fix lib test && prettier --write lib/*.js test/*.js *.md lib/*.ts",
+    "verifypublishsize": "bash ./verifypublishsize.bash"
   },
   "keywords": [
     "angular",
