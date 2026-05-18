@@ -1,3 +1,17 @@
+### 1.5.4
+
+There was a bug in the `disabledSyntaxes` option, which didn't check the syntax when using a nested expression.
+
+For example, this would run successfully :
+
+```js
+const options = { disabledSyntaxes: ["CallExpression"] };
+const scope = { log: console.log };
+compile("log(1)[0]", options)(scope);
+```
+
+Now, we correctly catch all call expressions.
+
 ### 1.5.3
 
 Make "a+b" return undefined if the scope is `{}` : if a or b is null or undefined.

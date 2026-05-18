@@ -1192,6 +1192,45 @@ describe("expressions", function () {
 			).to.throw(Error, '"CallExpression" is blocked by disabledSyntaxes');
 		});
 
+		it("should be possible to disallow call expressions even if those are nested deeply", function () {
+			expect(() =>
+				compile('[a("")[0]]', {
+					disabledSyntaxes: ["CallExpression"],
+				})
+			).to.throw(Error, '"CallExpression" is blocked by disabledSyntaxes');
+		});
+
+		it("should be possible to disallow literals", function () {
+			expect(() =>
+				compile("0", {
+					disabledSyntaxes: ["Literal"],
+				})
+			).to.throw(Error, '"Literal" is blocked by disabledSyntaxes');
+
+			expect(() =>
+				compile("1", {
+					disabledSyntaxes: ["Literal"],
+				})
+			).to.throw(Error, '"Literal" is blocked by disabledSyntaxes');
+
+			expect(() =>
+				compile("true", {
+					disabledSyntaxes: ["Literal"],
+				})
+			).to.throw(Error, '"Literal" is blocked by disabledSyntaxes');
+		});
+
+		it("should be possible to disallow ternaries with ConditionalExpression", function () {
+			expect(() =>
+				compile("(1 ? true : false)()", {
+					disabledSyntaxes: ["ConditionalExpression"],
+				})
+			).to.throw(
+				Error,
+				'"ConditionalExpression" is blocked by disabledSyntaxes'
+			);
+		});
+
 		it("should still be possible to run a | b if disabledSyntaxes:CallExpression", function () {
 			expect(
 				compile("a | b", {
