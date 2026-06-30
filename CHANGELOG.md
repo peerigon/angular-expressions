@@ -1,3 +1,24 @@
+### 1.6.0
+
+To simplify the code, we have decided to bring in some breaking changes, which should probably affect no users of this library.
+
+The following properties were accessible, and were specific to angular, but are most likely not needed :
+
+- `compile("xxx").inputs`
+- `compile("xxx").literal`
+- `compile("xxx").constant`
+
+Remove `cache` option.
+
+Now the cache is internal and cannot be changed externally.
+
+The cache now is a LRU cache (Least Recently Updated) using a doubly linked list to be O(1) no matter what the cache size limit is. By default 255 cache keys are stored. You can update the number of cache items by setting :
+
+```js
+var expressions = require("angular-expressions");
+expressions.compile.cache.setMaxSize(1000);
+```
+
 ### 1.5.4
 
 There was a bug in the `disabledSyntaxes` option, which didn't check the syntax when using a nested expression.

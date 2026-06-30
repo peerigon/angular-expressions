@@ -73,21 +73,18 @@ expr({
 }); // returns '1.23€'
 ```
 
-If you need an isolated `filters` object, this can be achieved by setting the `filters` attribute in the `options` argument. Global cache is disabled if using `options.filters`. To setup an isolated cache, you can also set the `cache` attribute in the `options` argument:
+If you need an isolated `filters` object, this can be achieved by setting the `filters` attribute in the `options` argument.
 
 ```javascript
 var isolatedFilters = {
   transform: (input) => input.toLowerCase(),
 };
-var isolatedCache = {};
 
 var resultOne = expressions.compile("'Foo Bar' | transform", {
   filters: isolatedFilters,
-  cache: isolatedCache,
 });
 
 console.log(resultOne()); // prints 'foo bar'
-console.log(isolatedCache); // prints '{"'Foo Bar' | transform": [Function fn] }'
 ```
 
 <br />
@@ -98,7 +95,7 @@ console.log(isolatedCache); // prints '{"'Foo Bar' | transform": [Function fn] }
 
 #### .compile(src): Function
 
-Compiles `src` and returns a function `evaluate()`. The compiled function is cached under `compile.cache[src]` to speed up further calls.
+Compiles `src` and returns a function `evaluate()`. The compiled function is cached under `compile.cache` which is stored as an LRUCache which prevents the cache to exceed a max size (256 cache items by default) to speed up further calls.
 
 Compiles also export the AST.
 
@@ -117,10 +114,6 @@ Example output of: `compile("tmp + 1").ast`
 ```
 
 _NOTE_ angular \$parse do not export ast variable it's done by this library.
-
-#### .compile.cache = Object.create(null)
-
-A cache containing all compiled functions. The src is used as key. Set this on `false` to disable the cache.
 
 #### .filters = {}
 
@@ -168,6 +161,56 @@ node --disable-proto=delete app.js
 ```
 
 If you're using some libraries that still rely on Prototype, this could break your application.
+
+Here is the revised text rewritten specifically for **developers using the `angular-expressions` library** in their projects.
+
+---
+
+## Security & Usage Notice: Prototype Protection & Safe Data Handling
+
+`angular-expressions` strictly blocks the lookup of properties inherited from the prototype chain to prevent Remote Code Execution (RCE) vulnerabilities.
+
+When designing your application templates and evaluation contexts, you must guide your end-users toward safe alternatives rather than attempting to circumvent this protection.
+
+### 1. Direct Method Calls are Blocked (Use Filters Instead)
+
+Your users cannot directly invoke inherited methods in their expressions (e.g., `"test".toUpperCase()` or `[3, 1, 2].toSorted()`). Instead, expose **user-defined filter functions** in your configuration:
+
+- **Blocked:** `"test".toUpperCase()` -> **Allowed Alternative:** `"test" | upper`
+- **Blocked:** `[3, 1, 2].toSorted()` -> **Allowed Alternative:** `[3, 1, 2] | sort`
+
+### 2. Best Practices for Writing Safe Filters
+
+When you provide custom filters to the expression evaluator, ensure their return values are secure:
+
+- **Primitives:** Always safe to return.
+- **Objects:** Should be plain data objects (no inheritance, methods, getters, or setters).
+- **State Mutation:** If a returned object _must_ include methods or setters, verify they cannot mutate any state outside the evaluation context.
+
+🛑 **CRITICAL SECURITY RISK:** Never write filters that expose constructors or prototypes.
+For example, registering filters like `prototype: (x) => Object.getPrototypeOf(x)` or `constructor: (x) => x.constructor` allows malicious users to access `Object.prototype` via `({}) | prototype` or `Function.prototype` via `[] | constructor | prototype`. **This introduces severe RCE vulnerabilities.**
+
+If your expressions need to know the type of a variable, return a primitive string descriptor instead of the constructor itself (e.g., return `Object.prototype.toString.call(x).slice(8, -1)`).
+
+### 3. Handling ORM Models (Sequelize / Mongoose)
+
+If you pass raw ORM model instances into the evaluation context, field resolution will fail. This happens because ORMs typically define fields as accessor properties on the model's **prototype**, which `angular-expressions` blocks.
+
+Before passing data to the expression evaluator, always convert your ORM models into plain-data views:
+
+- **Sequelize:** Pass `modelInstance.dataValues` instead of `modelInstance`
+- **Mongoose:** Pass `modelInstance.toObject()` instead of `modelInstance`
+
+## Cache limitations
+
+You can change the maxSize of the LRUCache that is used, by running :
+
+```
+const expressions = require("angular-expressions");
+expressions.compile.cache.setMaxSize(10000);
+```
+
+When an item is cached, the option for `isIdentifierStart` and `isIdentifierContinue` are not stored in the cache, meaning that if you change just those two parameters for the same tag, the previous version will be retrieved. We suggest you to use the same `isIdentifierStart` and `isIdentifierContinue` parameters for all your calls.
 
 ## User Precaution
 

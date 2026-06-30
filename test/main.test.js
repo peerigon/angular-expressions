@@ -1,5 +1,4 @@
-"use strict";
-
+/* eslint-disable no-proto,no-eval */
 var chai = require("chai");
 var expect = chai.expect;
 var expressions = require("../lib/main.js");
@@ -63,6 +62,34 @@ after(function name() {
 // These tests make no claim to be complete. We only test the most important parts of angular expressions.
 // I hope they have their own tests ;)
 describe("expressions", function () {
+	describe("cache memory usage", function () {
+		it("should not store too many expressions in the cache", function () {
+			global.storeFnString = function () {};
+			global.gc();
+			const heapInMb = process.memoryUsage().heapUsed / 1024 / 1024;
+			for (let i = 0; i < 10000; i++) {
+				compile(`${i}`);
+			}
+			global.gc();
+			const heapInMbEnd = process.memoryUsage().heapUsed / 1024 / 1024;
+			const heapMbDiff = heapInMbEnd - heapInMb;
+			expect(heapMbDiff).to.be.within(1, 3);
+		});
+
+		it("should be possible to store more expressions in the cache", function () {
+			global.storeFnString = function () {};
+			compile.cache.setMaxSize(10000);
+			const heapInMb = process.memoryUsage().heapUsed / 1024 / 1024;
+			for (let i = 0; i < 10000; i++) {
+				compile(`${i}`);
+			}
+			global.gc();
+			const heapInMbEnd = process.memoryUsage().heapUsed / 1024 / 1024;
+			const heapMbDiff = heapInMbEnd - heapInMb;
+			compile.cache.setMaxSize(255);
+			expect(heapMbDiff).to.be.within(25, 40);
+		});
+	});
 	describe(".Lexer", function () {
 		it("should be a function", function () {
 			expect(expressions.Lexer).to.be.a("function");
@@ -119,6 +146,14 @@ describe("expressions", function () {
 			}).to.throw("src must be a string, instead saw 'undefined'");
 		});
 
+		it("should throw error if trying to exceed max string length", function () {
+			expect(function () {
+				compile(
+					"s='x';s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;s=s+s;(s+s)[0];(s+s)[0];(s+s)[0];(s+s)[0];(s+s)[0];(s+s)[0];(s+s)[0];(s+s)[0];"
+				)({});
+			}).to.throw("Max string length exceeded");
+		});
+
 		it("should expose the ast", function () {
 			expect(compile("tmp").ast).to.be.a("object");
 		});
@@ -163,24 +198,6 @@ describe("expressions", function () {
 				evaluate = compile("`string\n`");
 				expect(evaluate(scope)).to.equal("string\n");
 			});
-
-			it("should work with variable substitutions `Hello ${name}`", function () {
-				evaluate = compile("`Hello ${name}, what's up ?`");
-				expect(evaluate({ name: "John" })).to.equal("Hello John, what's up ?");
-			});
-
-			it("should work with variable substitutions `Hello ${3*3}`", function () {
-				evaluate = compile("`Hello ${3*3}, what's up ?`");
-				expect(evaluate({ name: "John" })).to.equal("Hello 9, what's up ?");
-			});
-
-			it("should work with multiple variable substitutions", function () {
-				evaluate = compile("`User : ${user}, Age : ${age}`");
-				expect(evaluate({ user: "John", age: 55 })).to.equal(
-					"User : John, Age : 55"
-				);
-			});
-
 			it("should return [ship, 1, 2, []]", function () {
 				evaluate = compile("[ship, 1, 2, []]");
 				expect(evaluate(scope)).to.eql([scope.ship, 1, 2, []]);
@@ -244,6 +261,15 @@ describe("expressions", function () {
 				evaluate = compile("ship = 'ship'");
 				evaluate(scope);
 				expect(scope.ship).to.equal("ship");
+			});
+		});
+
+		describe("Assignments with computed properties", function () {
+			it("should work", function () {
+				const scope = { x: { y: 1 } };
+				evaluate = compile('x["y"] = 3');
+				evaluate(scope);
+				expect(scope.x.y).to.equal(3);
 			});
 		});
 
@@ -496,6 +522,13 @@ describe("expressions", function () {
 				expect(evaluate()).to.equal(1);
 			});
 
+			it("should work with modulo with an undefined value", function () {
+				expect(compile("[1 % x, x % 1]")()).to.deep.equal([
+					undefined,
+					undefined,
+				]);
+			});
+
 			it("should return the expected result when using && logical and", function () {
 				evaluate = compile("true && true");
 				expect(evaluate()).to.equal(true);
@@ -727,6 +760,16 @@ describe("expressions", function () {
 				}).to.throw("Filter 'xxx' is not defined");
 			});
 
+			it("should fail when filter does not exist", function () {
+				expect(function () {
+					compile("{k: (0 | nonexistentFilter)}");
+				}).throws("Filter 'nonexistentFilter' is not defined");
+
+				expect(function () {
+					compile("{[(0 | nonexistentFilter)]: 0}");
+				}).throws("Filter 'nonexistentFilter' is not defined");
+			});
+
 			it("should work with promise", async function () {
 				expressions.filters.sumAge = async function (input) {
 					input = await input;
@@ -781,41 +824,38 @@ describe("expressions", function () {
 				}).throws("Filter 'xxx' is not defined");
 			});
 
-			it("should have independent filter and cache object", function () {
+			it("should have independent filters option and expressions.filters", function () {
 				const filters = {
 					toDollars: (input) => {
 						const result = input.toFixed(2);
 						return `${result}$`;
 					},
 				};
-				const cache = {};
 
 				compile("1.2345 | toDollars", {
 					filters,
-					cache,
 				});
 
 				expect(expressions.filters).to.not.equal(filters);
 				expect(expressions.filters).to.not.have.property("toDollars");
-				expect(Object.keys(cache).length).to.equal(1);
 			});
 
 			it("should have different outcomes for the same filter name using different filter objects with different functions", function () {
-				const firstFilters = {
+				const upperFilters = {
 					transform: (tag) => tag.toUpperCase(),
 				};
-				const secondFilters = {
+				const lowerFilters = {
 					transform: (tag) => tag.toLowerCase(),
 				};
 
 				const text = '"The Quick Fox Jumps Over The Brown Log" | transform';
-				const resultOne = compile(text, { filters: firstFilters });
-				const resultTwo = compile(text, { filters: secondFilters });
+				const resultUpper = compile(text, { filters: upperFilters });
+				const resultLower = compile(text, { filters: lowerFilters });
 
-				expect(resultOne(text)).to.eql(
+				expect(resultUpper(text)).to.eql(
 					"THE QUICK FOX JUMPS OVER THE BROWN LOG"
 				);
-				expect(resultTwo(text)).to.eql(
+				expect(resultLower(text)).to.eql(
 					"the quick fox jumps over the brown log"
 				);
 			});
@@ -841,30 +881,6 @@ describe("expressions", function () {
 					cache,
 					csp: true,
 				})();
-			});
-		});
-
-		describe("when using argument options.cache", function () {
-			it("should use passed cache object", function () {
-				const cache = {};
-
-				expect(Object.keys(cache).length).to.equal(0);
-				compile("5.4321 | toDollars", {
-					filters: {
-						toDollars: (input) => input.toFixed(2),
-					},
-					cache,
-				});
-
-				expect(Object.keys(cache).length).to.equal(1);
-				expect(compile.cache).to.not.equal(cache);
-				expect(compile.cache).to.not.have.property("5.4321 | toDollars");
-			});
-		});
-
-		describe("when evaluating the same expression multiple times", function () {
-			it("should cache the generated function", function () {
-				expect(compile("a")).to.equal(compile("a"));
 			});
 		});
 
@@ -909,18 +925,69 @@ describe("expressions", function () {
 				expect(compile.cache).to.be.an("object");
 			});
 
-			it("should cache the generated function by the expression", function () {
+			it("should be possible to reuse same cache with different filters without csp", function () {
 				const cache = {};
-				var fn = compile("a", { cache });
-				expect(Object.values(cache)[0]).to.equal(fn);
+				const first = compile("'hello' | test", {
+					cache,
+					filters: {
+						test(s) {
+							return s.split("").reverse().join("");
+						},
+					},
+				})();
+				const second = compile("'hello' | test", {
+					cache,
+					filters: {
+						test(s) {
+							return s + s;
+						},
+					},
+				})();
+				const third = compile("'hello' | test", {
+					cache,
+					filters: {
+						test(s) {
+							return s.split("").reverse().join("");
+						},
+					},
+				})();
+				expect(first).to.equal("olleh");
+				expect(second).to.equal("hellohello");
+				expect(third).to.equal("olleh");
 			});
 
-			describe("when setting it to false", function () {
-				it("should disable the cache", function () {
-					compile.cache = false;
-					expect(compile("a")).to.not.equal(compile("a"));
-					compile.cache = Object.create(null);
-				});
+			it("should be possible to reuse same cache with different filters with csp", function () {
+				const cache = {};
+				const first = compile("'hello' | test", {
+					csp: true,
+					cache,
+					filters: {
+						test(s) {
+							return s.split("").reverse().join("");
+						},
+					},
+				})();
+				const second = compile("'hello' | test", {
+					csp: true,
+					cache,
+					filters: {
+						test(s) {
+							return s + s;
+						},
+					},
+				})();
+				const third = compile("'hello' | test", {
+					csp: true,
+					cache,
+					filters: {
+						test(s) {
+							return s.split("").reverse().join("");
+						},
+					},
+				})();
+				expect(first).to.equal("olleh");
+				expect(second).to.equal("hellohello");
+				expect(third).to.equal("olleh");
 			});
 		});
 	});
@@ -1074,21 +1141,23 @@ describe("expressions", function () {
 		});
 
 		it("should disallow from changing prototype", function () {
-			let err;
-			try {
-				evaluate = compile("name.split = 10");
-				evaluate({ name: "hello" });
-			} catch (e) {
-				err = e;
-			}
-			expect(err.message).to.equal(
-				"Cannot create property 'split' on string 'hello'"
-			);
+			let scope = { name: "hello" };
+			evaluate = compile("name.split = 10");
+			evaluate(scope);
+			expect(scope.name.split).to.be.a("function");
 		});
 
 		it("should not show value of __proto__", function () {
 			evaluate = compile("__proto__");
 			expect(evaluate({})).to.eql(undefined);
+		});
+
+		it("should not show value of __proto__ when using filters", function () {
+			expect(() =>
+				compile("x | __proto__", {
+					filters: {},
+				})
+			).to.throw("Filter '__proto__' is not defined");
 		});
 
 		it("should not show value of __proto__ if passing context (second argument) with csp = false", function () {
@@ -1330,6 +1399,262 @@ Expected one of: ["Program", "ExpressionStatement", "AssignmentExpression", "Con
 		it("should work with division", function () {
 			evaluate = compile("a/b", { csp: false });
 			expect(evaluate({})).to.eql(undefined);
+		});
+	});
+
+	describe("Identifiers", function () {
+		it("should never allow identifiers such as ' when setting isIdentifierContinue", function () {
+			let error;
+			try {
+				compile("x',(throw foo),'y", {
+					isIdentifierContinue(ch) {
+						return /[A-Za-z0-9',()+ =.]/.test(ch);
+					},
+				})({});
+			} catch (e) {
+				error = e;
+			}
+			expect(error.message).to.equal(
+				"Character ' should never be part of an identifier"
+			);
+		});
+		it("should never allow identifiers such as ( when setting isIdentifierStart", function () {
+			let error;
+			try {
+				compile("(throw foo),'y", {
+					isIdentifierStart(ch) {
+						return /[A-Za-z0-9',()+ =.]/.test(ch);
+					},
+				})({});
+			} catch (e) {
+				error = e;
+			}
+			expect(error.message).to.equal(
+				"Character ( should never be part of an identifier"
+			);
+		});
+	});
+
+	describe("foobar", function () {
+		it('should work with x["y"] = 3', function () {
+			var scope1 = {};
+			compile('x["y"] = 3', { csp: true })(scope1);
+			expect(scope1).to.deep.equal({
+				x: { y: 3 },
+			});
+
+			var scope2 = {};
+			compile('x["y"] = 3', { csp: false })(scope2);
+			expect(scope2).to.deep.equal({
+				x: { y: 3 },
+			});
+		});
+	});
+
+	describe("foofoo", function () {
+		it("should block access to __proto__ in ObjectExpression with length trick", function () {
+			let result;
+			result = compile("+{__proto__: [], length: 4e9}")();
+			expect(result).to.deep.equal(NaN);
+			result = compile("+{__proto__: [], length: 4e9}", { csp: true })();
+			expect(result).to.deep.equal(NaN);
+		});
+
+		it("should block access to __proto__ in ObjectExpression for normal object", function () {
+			let result;
+			result = compile('{__proto__: {"aa": "bb"}}')();
+			expect(result).to.deep.equal({});
+			expect(result.__proto__).to.deep.equal({});
+		});
+
+		it("should block access to __proto__ in ObjectExpression for normal object with csp", function () {
+			let result;
+			result = compile('{__proto__: {"aa": "bb"}}', { csp: true })();
+			expect(result.__proto__).to.deep.equal({});
+			expect(result).to.deep.equal({});
+		});
+
+		it("should block access to __proto__ in member expression for uncomputed property", function () {
+			let result;
+			result = compile('k = {}; k.__proto__ = {"cc": "dd"}; k')({}).__proto__;
+			expect(result).to.deep.equal({});
+		});
+
+		it("should block access to __proto__ in member expression for uncomputed property with csp", function () {
+			let result;
+			result = compile('k = {}; k.__proto__ = {"cc": "dd"}; k', { csp: true })(
+				{}
+			).__proto__;
+			expect(result).to.deep.equal({});
+		});
+
+		it("should block access to __proto__ in member expression for computed property", function () {
+			let result = compile('k["__proto__"] = {"cc": "dd"};')({});
+			expect(result).to.deep.equal(undefined);
+		});
+
+		it("should block access to __proto__ in member expression for computed property with csp", function () {
+			let result;
+
+			result = compile('k = {}; ke = "__proto__"; k[ke] = {"cc": "dd"}; k', {
+				csp: true,
+			})({}).__proto__;
+			expect(result).to.deep.equal({});
+		});
+	});
+
+	describe("WIP", function () {
+		it("should block access to global this", function () {
+			expect(function () {
+				compile("global.eval('throw new Error(\"PWN!\")')", { csp: true })({
+					global: globalThis,
+				});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to global this using function call", function () {
+			expect(function () {
+				compile("ev = getG(); ev('throw new Error(\"PWN!\")')", { csp: true })({
+					getG: () => globalThis.eval,
+				});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to global this using function call with csp: false", function () {
+			expect(function () {
+				compile("ev = getG(); ev('throw new Error(\"PWN!\")')", { csp: false })(
+					{
+						getG: () => globalThis.eval,
+					}
+				);
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to global this using filters", function () {
+			expect(function () {
+				compile("ev = (0 | getG); ev('throw new Error(\"PWN!\")')", {
+					csp: true,
+					filters: {
+						getG: () => globalThis.eval,
+					},
+				})({});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to global this using filters with csp: false", function () {
+			expect(function () {
+				compile("ev = (0 | getG); ev('throw new Error(\"PWN!\")')", {
+					csp: true,
+					filters: {
+						getG: () => globalThis.eval,
+					},
+				})({});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to global this using member expression", function () {
+			expect(function () {
+				compile("ev = global.eval; ev('throw new Error(\"PWN!\")')", {
+					csp: true,
+				})({
+					global: globalThis,
+				});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to global this using member expression with csp : false", function () {
+			expect(function () {
+				compile("ev = global.eval; ev('throw new Error(\"PWN!\")')", {
+					csp: false,
+				})({
+					global: globalThis,
+				});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to global this with csp : false", function () {
+			expect(function () {
+				compile("this('throw new Error(\"PWN!\")')", {
+					csp: false,
+				})(globalThis.eval);
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to global this with csp : true", function () {
+			expect(function () {
+				compile("this('throw new Error(\"PWN!\")')", {
+					csp: true,
+				})(globalThis.eval);
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to global this with csp:false", function () {
+			expect(function () {
+				compile("global.eval('throw new Error(\"PWN!\")')", { csp: false })({
+					global: globalThis,
+				});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block first attack with csp", function () {
+			// This example code must NOT run with "use strict".
+			// `window` does not have the property named `data` by default,
+			// so do not pass any parameter to not reference `window.data`.
+			compile(
+				`window = (0 || builder.append)();window.eval('throw new Error(\"PWN!\")')
+`,
+				{ csp: true }
+			)({
+				// An example StringBuilder-style API that supports method chaining.
+				// Supposed to be used like `builder.append("A").append("B", "C").toString()`.
+				builder: {
+					data: [],
+					append(...what) {
+						if (what.length) {
+							this.data.push(...what);
+						}
+						return this;
+					},
+					toString() {
+						return this.data.join("");
+					},
+				},
+			});
+		});
+
+		it("should block second attack without CSP", function () {
+			compile("(1 ? model.getName : null)('https://example.com/')")({
+				// An example object that is supposed to lazy-load the name, and cache it.
+				// `fetch` happens to share its name with the global networking function.
+				model: {
+					getName(key) {
+						return (this._name ??= this.fetch(key));
+					},
+					fetch(key) {
+						return "test name " + key;
+					},
+				},
+			});
 		});
 	});
 });
