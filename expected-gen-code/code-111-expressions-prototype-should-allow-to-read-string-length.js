@@ -25,19 +25,3 @@
 	}
 	return v5;
 };
-fn.assign = function (s, v, l) {
-	var v0, v1, v2, v3;
-	v2 = "abc";
-	if (v2 != null && (v2.length == null || hasOwn(v2, "length"))) {
-		v3 = v2.length;
-	} else {
-		v3 = undefined;
-	}
-	if (v2 != null && (hasOwn(v2, "length") || v2.length == null)) {
-		v1 = v;
-		v0 = v2.length = v1; // TSIgnore TS2540
-	}
-	v1 = v;
-	return v0;
-};
-
