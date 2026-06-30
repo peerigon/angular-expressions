@@ -28,7 +28,6 @@ function validChars(ch: string) {
 
 expressions.compile("être_embarassé", { isIdentifierStart: validChars });
 
-const cache = expressions.compile.cache;
 const ast = expressions.compile("foobar").ast;
 
 filters.uppercase = (input: string): string => input.toUpperCase();
@@ -37,7 +36,6 @@ expressions.compile("number | square", {
   filters: {
     square: (input: number) => input * input,
   },
-  cache: {},
 });
 
 expressions.compile("number | square", {
@@ -45,7 +43,6 @@ expressions.compile("number | square", {
     square: (input: number) => input * input,
   },
   disabledSyntaxes: ["CallExpression"],
-  cache: {},
   handleThis: false,
 });
 
@@ -54,7 +51,6 @@ expressions.compile("number | square", {
     square: (input: number) => input * input,
   },
   disabledSyntaxes: ["FilterExpression"],
-  cache: {},
   handleThis: false,
 });
 
