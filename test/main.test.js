@@ -4,6 +4,7 @@ var expect = chai.expect;
 var expressions = require("../lib/main.js");
 var compile = expressions.compile;
 var slug = require("./slug.js");
+var util = require("util");
 
 function resolveSoon(val) {
 	return new Promise(function (resolve) {
@@ -286,6 +287,34 @@ describe("expressions", function () {
 		});
 
 		describe("Security", function () {
+			it("should restore Function.prototype.constructor descriptor after evaluation with csp:false", function () {
+				var before = Object.getOwnPropertyDescriptor(
+					Function.prototype,
+					"constructor"
+				);
+				compile("1 + 1", { csp: false })({});
+				var after = Object.getOwnPropertyDescriptor(
+					Function.prototype,
+					"constructor"
+				);
+				expect(after).to.deep.equal(before);
+				expect(after.enumerable).to.equal(false);
+			});
+
+			it("should restore Function.prototype.constructor descriptor after evaluation with csp:true", function () {
+				var before = Object.getOwnPropertyDescriptor(
+					Function.prototype,
+					"constructor"
+				);
+				compile("1 + 1", { csp: true })({});
+				var after = Object.getOwnPropertyDescriptor(
+					Function.prototype,
+					"constructor"
+				);
+				expect(after).to.deep.equal(before);
+				expect(after.enumerable).to.equal(false);
+			});
+
 			it("should not leak when trying to access constructor.constructor", function () {
 				evaluate = compile(
 					"''['c'+'onstructor']['c'+'onstructor']('return process;')()"
@@ -760,6 +789,7 @@ describe("expressions", function () {
 				}).to.throw("Filter 'xxx' is not defined");
 			});
 
+			// Tests findUndefinedFilters function
 			it("should fail when filter does not exist", function () {
 				expect(function () {
 					compile("{k: (0 | nonexistentFilter)}");
@@ -768,6 +798,12 @@ describe("expressions", function () {
 				expect(function () {
 					compile("{[(0 | nonexistentFilter)]: 0}");
 				}).throws("Filter 'nonexistentFilter' is not defined");
+			});
+
+			it("should fail when filter does not exist inside call expression", function () {
+				expect(function () {
+					compile("(0 | x)()");
+				}).throws("Filter 'x' is not defined");
 			});
 
 			it("should work with promise", async function () {
@@ -1198,6 +1234,31 @@ describe("expressions", function () {
 			expect(evaluate({ toString: 10 })).to.eql(10);
 		});
 
+		it("should not show __proto__ using getPrototypeOf with objects with strings", function () {
+			const result = [
+				Object.getPrototypeOf(
+					compile("{a: 1, ['b']: 2, __proto__: {}}", { csp: true })()
+				),
+				Object.getPrototypeOf(
+					compile("{a: 1, ['b']: 2, '__proto__': {}}", { csp: true })()
+				),
+				Object.getPrototypeOf(
+					compile("{a: 1, ['b']: 2, __proto__: {}}", { csp: false })()
+				),
+				Object.getPrototypeOf(
+					compile("{a: 1, ['b']: 2, '__proto__': {}}", { csp: false })()
+				),
+				Object.getPrototypeOf(
+					compile("{a: 1, ['b']: 2, `__proto__`: {}}", { csp: false })()
+				),
+			];
+			for (const item of result) {
+				const str = util.inspect(item, { showHidden: true, depth: 2 });
+				expect(str).to.contain("null prototype");
+				expect(str).to.not.contain("{}");
+			}
+		});
+
 		it("ensure that prototype is not looked up while resolving filters", function () {
 			const options = {
 				filters: {
@@ -1435,7 +1496,7 @@ Expected one of: ["Program", "ExpressionStatement", "AssignmentExpression", "Con
 		});
 	});
 
-	describe("foobar", function () {
+	describe("Assignments", function () {
 		it('should work with x["y"] = 3', function () {
 			var scope1 = {};
 			compile('x["y"] = 3', { csp: true })(scope1);
@@ -1451,7 +1512,41 @@ Expected one of: ["Program", "ExpressionStatement", "AssignmentExpression", "Con
 		});
 	});
 
-	describe("foofoo", function () {
+	describe("computed property keys", function () {
+		it("should stringify computed keys only once with csp:true", function () {
+			var count = 0;
+			var key = {
+				toString: function () {
+					count++;
+					return count === 1 ? "a" : "b";
+				},
+			};
+			var result = compile("obj[key]", { csp: true })({
+				obj: { a: "A", b: "B" },
+				key: key,
+			});
+			expect(count).to.equal(1);
+			expect(result).to.equal("A");
+		});
+
+		it("should stringify computed keys only once with csp:false", function () {
+			var count = 0;
+			var key = {
+				toString: function () {
+					count++;
+					return count === 1 ? "a" : "b";
+				},
+			};
+			var result = compile("obj[key]", { csp: false })({
+				obj: { a: "A", b: "B" },
+				key: key,
+			});
+			expect(count).to.equal(1);
+			expect(result).to.equal("A");
+		});
+	});
+
+	describe("block access to __proto__", function () {
 		it("should block access to __proto__ in ObjectExpression with length trick", function () {
 			let result;
 			result = compile("+{__proto__: [], length: 4e9}")();
@@ -1503,7 +1598,8 @@ Expected one of: ["Program", "ExpressionStatement", "AssignmentExpression", "Con
 		});
 	});
 
-	describe("WIP", function () {
+	// Tests assertSafeValue
+	describe("Disable access to eval", function () {
 		it("should block access to global this", function () {
 			expect(function () {
 				compile("global.eval('throw new Error(\"PWN!\")')", { csp: true })({
@@ -1552,7 +1648,7 @@ Expected one of: ["Program", "ExpressionStatement", "AssignmentExpression", "Con
 		it("should block access to global this using filters with csp: false", function () {
 			expect(function () {
 				compile("ev = (0 | getG); ev('throw new Error(\"PWN!\")')", {
-					csp: true,
+					csp: false,
 					filters: {
 						getG: () => globalThis.eval,
 					},
@@ -1616,6 +1712,312 @@ Expected one of: ["Program", "ExpressionStatement", "AssignmentExpression", "Con
 			);
 		});
 
+		it("should block access to eval in identifier", function () {
+			expect(function () {
+				compile("eval", { csp: true })({
+					eval: globalThis,
+				});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to eval in locals", function () {
+			expect(function () {
+				compile("$locals", { csp: true })(
+					{
+						global: globalThis,
+					},
+					globalThis
+				);
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to eval in identifier with csp:false", function () {
+			expect(function () {
+				compile("eval", { csp: false })({
+					eval: globalThis,
+				});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block access to eval in locals with csp:false", function () {
+			expect(function () {
+				compile("$locals", { csp: false })(
+					{
+						global: globalThis,
+					},
+					globalThis
+				);
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block bare this returning globalThis with csp:true", function () {
+			expect(function () {
+				compile("this", { csp: true })(globalThis);
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block bare this returning globalThis with csp:false", function () {
+			expect(function () {
+				compile("this", { csp: false })(globalThis);
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block dangerous identifier from locals with csp:true", function () {
+			expect(function () {
+				compile("x", { csp: true })({}, { x: globalThis });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block dangerous identifier from locals with csp:false", function () {
+			expect(function () {
+				compile("x", { csp: false })({}, { x: globalThis });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block identifier resolving to eval with csp:true", function () {
+			expect(function () {
+				compile("ev", { csp: true })({ ev: eval });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block identifier resolving to eval with csp:false", function () {
+			expect(function () {
+				compile("ev", { csp: false })({ ev: eval });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block identifier resolving to Function with csp:true", function () {
+			expect(function () {
+				compile("F", { csp: true })({ F: Function });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block identifier resolving to Function with csp:false", function () {
+			expect(function () {
+				compile("F", { csp: false })({ F: Function });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block identifier resolving to setTimeout with csp:true", function () {
+			expect(function () {
+				compile("t", { csp: true })({ t: setTimeout });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block identifier resolving to setTimeout with csp:false", function () {
+			expect(function () {
+				compile("t", { csp: false })({ t: setTimeout });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block member expression returning globalThis with csp:true", function () {
+			expect(function () {
+				compile("o.g", { csp: true })({ o: { g: globalThis } });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block member expression returning globalThis with csp:false", function () {
+			expect(function () {
+				compile("o.g", { csp: false })({ o: { g: globalThis } });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block computed member expression returning globalThis with csp:true", function () {
+			expect(function () {
+				compile("o['g']", { csp: true })({ o: { g: globalThis } });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block computed member expression returning globalThis with csp:false", function () {
+			expect(function () {
+				compile("o['g']", { csp: false })({ o: { g: globalThis } });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block array index returning globalThis with csp:true", function () {
+			expect(function () {
+				compile("a[0]", { csp: true })({ a: [globalThis] });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block array index returning globalThis with csp:false", function () {
+			expect(function () {
+				compile("a[0]", { csp: false })({ a: [globalThis] });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block nested member expression returning globalThis with csp:true", function () {
+			expect(function () {
+				compile("o.a.b", { csp: true })({ o: { a: { b: globalThis } } });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block nested member expression returning globalThis with csp:false", function () {
+			expect(function () {
+				compile("o.a.b", { csp: false })({ o: { a: { b: globalThis } } });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block this.member returning globalThis with csp:true", function () {
+			expect(function () {
+				compile("this.g", { csp: true })({ g: globalThis });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block this.member returning globalThis with csp:false", function () {
+			expect(function () {
+				compile("this.g", { csp: false })({ g: globalThis });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block $locals.member returning globalThis with csp:true", function () {
+			expect(function () {
+				compile("$locals.x", { csp: true })({}, { x: globalThis });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block $locals.member returning globalThis with csp:false", function () {
+			expect(function () {
+				compile("$locals.x", { csp: false })({}, { x: globalThis });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block calling eval via member expression with csp:true", function () {
+			expect(function () {
+				compile("o.e('1+1')", { csp: true })({ o: { e: eval } });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block calling eval via member expression with csp:false", function () {
+			expect(function () {
+				compile("o.e('1+1')", { csp: false })({ o: { e: eval } });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block calling Function via member expression with csp:true", function () {
+			expect(function () {
+				compile("o.F('return 7')()", { csp: true })({ o: { F: Function } });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block calling Function via member expression with csp:false", function () {
+			expect(function () {
+				compile("o.F('return 7')()", { csp: false })({ o: { F: Function } });
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block copying dangerous value via member assignment with csp:true", function () {
+			expect(function () {
+				compile("o.x = p.g", { csp: true })({
+					o: {},
+					p: { g: globalThis },
+				});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should block copying dangerous value via member assignment with csp:false", function () {
+			expect(function () {
+				compile("o.x = p.g", { csp: false })({
+					o: {},
+					p: { g: globalThis },
+				});
+			}).to.throw(
+				"Security Error: Direct operations on the global scope are forbidden."
+			);
+		});
+
+		it("should not use globalThis as thisArg for detached calls with csp:true", function () {
+			expect(
+				compile("(0 || cache.get)('fetch')", { csp: true })({
+					cache: {
+						get(k) {
+							return this[k];
+						},
+						set(k, v) {
+							return (this[k] = v);
+						},
+					},
+				})
+			).to.equal(undefined);
+		});
+
+		it("should not use globalThis as thisArg for detached calls with csp:false", function () {
+			expect(
+				compile("(0 || cache.get)('fetch')", { csp: false })({
+					cache: {
+						get(k) {
+							return this[k];
+						},
+						set(k, v) {
+							return (this[k] = v);
+						},
+					},
+				})
+			).to.equal(undefined);
+		});
+
 		it("should block first attack with csp", function () {
 			// This example code must NOT run with "use strict".
 			// `window` does not have the property named `data` by default,
@@ -1643,18 +2045,24 @@ Expected one of: ["Program", "ExpressionStatement", "AssignmentExpression", "Con
 		});
 
 		it("should block second attack without CSP", function () {
-			compile("(1 ? model.getName : null)('https://example.com/')")({
-				// An example object that is supposed to lazy-load the name, and cache it.
-				// `fetch` happens to share its name with the global networking function.
-				model: {
-					getName(key) {
-						return (this._name ??= this.fetch(key));
+			var thisArg;
+			expect(function () {
+				compile("(1 ? model.getName : null)('https://example.com/')")({
+					// An example object that is supposed to lazy-load the name, and cache it.
+					// `fetch` happens to share its name with the global networking function.
+					model: {
+						getName(key) {
+							/* eslint-disable-next-line consistent-this */
+							thisArg = this;
+							return (this._name ??= this.fetch(key));
+						},
+						fetch(key) {
+							return "test name " + key;
+						},
 					},
-					fetch(key) {
-						return "test name " + key;
-					},
-				},
-			});
+				});
+			}).to.throw(TypeError);
+			expect(thisArg).to.not.equal(globalThis);
 		});
 	});
 });

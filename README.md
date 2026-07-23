@@ -147,6 +147,8 @@ There is no `dist` build because it's not 2005 anymore. Use a module bundler lik
 
 # Security
 
+**Important:** Checks that reject certain well-known dangerous values (such as `globalThis`, `eval`, `Function`, or `setTimeout`) are **not a security boundary**. They only cover a small, fixed set of built-ins and exist to help you notice incorrect usage of the library (for example, putting the global object or `eval` into the evaluation scope or locals). Do not treat them as sandboxing or as protection against untrusted expressions or untrusted scope data. Safe use still depends on what you pass into `compile()` and into the evaluated scope, locals, and filters.
+
 ## Security recommendation
 
 If you are running in Node.JS, we recommend you to use the following flag in your node command so that access to `__proto__` is not possible.
@@ -214,7 +216,7 @@ When an item is cached, the option for `isIdentifierStart` and `isIdentifierCont
 
 ## User Precaution
 
-When providing data or filters to the library, ensure that you do not include "eval", "Function", or any filters that internally invoke these functions, as doing so could expose your users to the risk of Remote Code Execution (RCE).
+Do not put dangerous values such as `eval`, `Function`, `globalThis`, or filters that invoke them into the evaluation scope, locals, or filter set. The library may throw when it recognizes some of these values, but that is only a usage hint: it does not list every dangerous built-in and must not be relied on as a sandbox. Treating untrusted input as trusted scope or filter data can still lead to Remote Code Execution (RCE).
 
 ## Authorship
 
