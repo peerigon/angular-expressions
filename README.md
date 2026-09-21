@@ -93,9 +93,27 @@ console.log(resultOne()); // prints 'foo bar'
 
 ### exports
 
-#### .compile(src): Function
+#### .compile(src, options?): Function
 
 Compiles `src` and returns a function `evaluate()`. The compiled function is cached under `compile.cache` which is stored as an LRUCache which prevents the cache to exceed a max size (256 cache items by default) to speed up further calls.
+
+When `options` contain values that cannot be identified safely (function, symbol, or object `literals`, or custom identifier callbacks), that compilation is not stored in the global cache.
+
+#### .compile.withOptions(options): Function
+
+Returns a compile function with options bound once. Tags are passed later. Each bound compiler has its own LRU, keyed only by source, so function literals can be cached safely for that instance:
+
+```javascript
+var myCompiler = expressions.compile.withOptions({
+  literals: { auditFn: () => "ok" },
+  cacheSize: 256,
+});
+
+myCompiler("auditFn()")(); // 'ok'
+myCompiler("1 + 2")(); // 3
+```
+
+Options are snapshotted. Later mutation of the original `options` object is ignored. Two bound compilers do not share compiled state.
 
 Compiles also export the AST.
 
@@ -212,7 +230,9 @@ const expressions = require("angular-expressions");
 expressions.compile.cache.setMaxSize(10000);
 ```
 
-When an item is cached, the option for `isIdentifierStart` and `isIdentifierContinue` are not stored in the cache, meaning that if you change just those two parameters for the same tag, the previous version will be retrieved. We suggest you to use the same `isIdentifierStart` and `isIdentifierContinue` parameters for all your calls.
+For a private cache with bound options (including function-valued literals), use `compile.withOptions`. Per-call `compile(src, { cache: ... })` is not supported.
+
+When an item is cached on the global `compile()` path, identifier callbacks are not part of the cache key; those compilations are not stored. Prefer `withOptions` if you use custom `isIdentifierStart` or `isIdentifierContinue`.
 
 ## User Precaution
 

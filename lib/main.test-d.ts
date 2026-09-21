@@ -54,6 +54,19 @@ expressions.compile("number | square", {
   handleThis: false,
 });
 
+const bound = expressions.compile.withOptions({
+  csp: true,
+  literals: { key: "x" },
+  cacheSize: 32,
+});
+bound("key");
+
+expectError(
+  expressions.compile("x", {
+    cache: {},
+  })
+);
+
 new Parser(new Lexer(), getFilters, {
   csp: true,
   disabledSyntaxes: ["CallExpression"],

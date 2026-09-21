@@ -40,12 +40,15 @@ interface Cache {
   [x: string]: any;
 }
 
-// How to define all disabledSyntaxes using a set of strings, like disabledSyntaxes: string[]{"CallExpression", "FilterExpression"}
 interface CompileFuncOptions extends LexerOptions {
   filters?: Filters;
-  cache?: Cache;
   handleThis?: boolean;
   disabledSyntaxes?: SyntaxType[];
+  csp?: boolean;
+  literals?: {
+    [x: string]: any;
+  };
+  cacheSize?: number;
 }
 
 type EvaluatorFunc = {
@@ -54,9 +57,14 @@ type EvaluatorFunc = {
   assign: (scope: any, value: any) => any;
 };
 
+type BoundCompileFunc = {
+  (tag: string): EvaluatorFunc;
+};
+
 type CompileFunc = {
   (tag: string, options?: CompileFuncOptions): EvaluatorFunc;
   cache: Cache;
+  withOptions(options?: CompileFuncOptions): BoundCompileFunc;
 };
 
 type FilterFunction = (input: any, ...args: any[]) => any;

@@ -961,6 +961,60 @@ describe("expressions", function () {
 				expect(compile.cache).to.be.an("object");
 			});
 
+			it("should not reuse callable literals across compile() callers", function () {
+				compile.cache.setMaxSize(0);
+				compile.cache.setMaxSize(256);
+				const sizeBefore = compile.cache.size;
+				const first = compile("auditFn()", {
+					csp: true,
+					literals: {
+						auditFn: () => "first",
+					},
+				});
+				const second = compile("auditFn()", {
+					csp: true,
+					literals: {
+						auditFn: () => "second",
+					},
+				});
+				expect(first()).to.equal("first");
+				expect(second()).to.equal("second");
+				expect(compile.cache.size).to.equal(sizeBefore);
+			});
+
+			it("should ignore a per-call cache object and keep using the global cache", function () {
+				compile.cache.setMaxSize(0);
+				compile.cache.setMaxSize(256);
+				const tenantA = {};
+				const tenantB = {};
+				compile("1 + 1", { cache: tenantA });
+				compile("2 + 2", { cache: tenantB });
+				expect(Object.keys(tenantA)).to.eql([]);
+				expect(Object.keys(tenantB)).to.eql([]);
+				expect(compile.cache.size).to.be.above(0);
+			});
+
+			it("should not let inherited options.src replace the source cache identity", function () {
+				const options = Object.create({ src: "x = 1" });
+				options.csp = true;
+				const evaluate = compile("x", options);
+				const scope = { x: 7 };
+				expect(evaluate(scope)).to.equal(7);
+				expect(scope.x).to.equal(7);
+			});
+
+			it("should not let options.toJSON redirect the source cache identity", function () {
+				const evaluate = compile("x", {
+					csp: true,
+					toJSON: function () {
+						return { src: "x = 1", csp: true };
+					},
+				});
+				const scope = { x: 7 };
+				expect(evaluate(scope)).to.equal(7);
+				expect(scope.x).to.equal(7);
+			});
+
 			it("should be possible to reuse same cache with different filters without csp", function () {
 				const cache = {};
 				const first = compile("'hello' | test", {
@@ -1024,6 +1078,49 @@ describe("expressions", function () {
 				expect(first).to.equal("olleh");
 				expect(second).to.equal("hellohello");
 				expect(third).to.equal("olleh");
+			});
+		});
+
+		describe(".withOptions", function () {
+			it("should bind literals to a compiler with a private cache", function () {
+				const compilerA = compile.withOptions({
+					csp: true,
+					literals: {
+						auditFn: () => "A",
+					},
+				});
+				const compilerB = compile.withOptions({
+					csp: true,
+					literals: {
+						auditFn: () => "B",
+					},
+				});
+				expect(compilerA("auditFn()")()).to.equal("A");
+				expect(compilerB("auditFn()")()).to.equal("B");
+				expect(compilerA("auditFn()")()).to.equal("A");
+			});
+
+			it("should snapshot options so later mutation is ignored", function () {
+				const options = {
+					csp: true,
+					literals: {
+						cap: () => 1,
+					},
+				};
+				const compiler = compile.withOptions(options);
+				options.literals.cap = () => 2;
+				options.csp = false;
+				expect(compiler("cap()")()).to.equal(1);
+			});
+
+			it("should compile tags without per-call options", function () {
+				const compiler = compile.withOptions({
+					literals: {
+						key: "MYKEY",
+					},
+				});
+				expect(compiler("key + key")()).to.equal("MYKEYMYKEY");
+				expect(compiler("1 + 2")()).to.equal(3);
 			});
 		});
 	});
@@ -1150,6 +1247,25 @@ describe("expressions", function () {
 			});
 
 			expect(evaluate({ être_embarassé: "Ping" })).to.eql("Ping");
+		});
+
+		it("should not reuse identifier callbacks from a previous compile()", function () {
+			function validChars(ch) {
+				return (
+					(ch >= "a" && ch <= "z") ||
+					(ch >= "A" && ch <= "Z") ||
+					ch === "_" ||
+					ch === "$" ||
+					"ÀÈÌÒÙàèìòùÁÉÍÓÚáéíóúÂÊÎÔÛâêîôûÃÑÕãñõÄËÏÖÜŸäëïöüÿß".indexOf(ch) !== -1
+				);
+			}
+			compile("être_embarassé", {
+				isIdentifierStart: validChars,
+				isIdentifierContinue: validChars,
+			});
+			expect(function () {
+				compile("être_embarassé")({ être_embarassé: "Ping" });
+			}).to.throw();
 		});
 	});
 
