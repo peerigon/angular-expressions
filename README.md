@@ -221,6 +221,10 @@ Before passing data to the expression evaluator, always convert your ORM models 
 - **Sequelize:** Pass `modelInstance.dataValues` instead of `modelInstance`
 - **Mongoose:** Pass `modelInstance.toObject()` instead of `modelInstance`
 
+## Resource limits (DoS)
+
+`compile()` rejects expression source longer than 250 characters. Raise the limit per call with `{ maxExpressionLength: 750 }`. This bounds parser depth and cache memory. It is not a sandbox.
+
 ## Cache limitations
 
 You can change the maxSize of the LRUCache that is used, by running :

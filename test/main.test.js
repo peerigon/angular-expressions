@@ -155,6 +155,23 @@ describe("expressions", function () {
 			}).to.throw("Max string length exceeded");
 		});
 
+		it("should throw if the expression source is too long", function () {
+			const src = "a".repeat(251);
+			expect(function () {
+				compile(src);
+			}).to.throw("Max string length exceeded");
+		});
+
+		it("should allow a longer source when maxExpressionLength is raised", function () {
+			const src = "a".repeat(501);
+			expect(compile(src, { maxExpressionLength: 10000 })()).to.equal(
+				undefined
+			);
+			expect(function () {
+				compile(src, { maxExpressionLength: 500 });
+			}).to.throw("Max string length exceeded");
+		});
+
 		it("should expose the ast", function () {
 			expect(compile("tmp").ast).to.be.a("object");
 		});
@@ -2179,6 +2196,49 @@ Expected one of: ["Program", "ExpressionStatement", "AssignmentExpression", "Con
 				});
 			}).to.throw(TypeError);
 			expect(thisArg).to.not.equal(globalThis);
+		});
+	});
+
+	describe("Nested arrays", function () {
+		it("should evaluate nested array literals", function () {
+			expect(compile("[[[1]]]")()).to.eql([[[1]]]);
+			expect(compile("[[[1+2, 3]]]")()).to.eql([[[3, 3]]]);
+			expect(compile("[[], [[]]]")()).to.eql([[], [[]]]);
+			expect(compile("[[[]]]")()).to.eql([[[]]]);
+		});
+
+		it("should support trailing commas in nested arrays", function () {
+			expect(compile("[1,]")()).to.eql([1]);
+			expect(compile("[[[1,],],]")()).to.eql([[[1]]]);
+		});
+
+		it("should support postfix on nested arrays", function () {
+			expect(compile("[[[1]]][0][0][0]")()).to.equal(1);
+			expect(compile("[[[1, 2]]][0][0][1]")()).to.equal(2);
+		});
+
+		it("should throw on mismatched array brackets [[[[[[[[1]]]]]]", function () {
+			expect(function () {
+				compile("[[[[[[[[1]]]]]]");
+			}).to.throw();
+			expect(function () {
+				compile("[[1]]]");
+			}).to.throw();
+			expect(function () {
+				compile("[[[1]]");
+			}).to.throw();
+			expect(function () {
+				compile("[");
+			}).to.throw();
+			expect(function () {
+				compile("]");
+			}).to.throw();
+		});
+
+		it("should throw on unclosed parentheses", function () {
+			expect(function () {
+				compile("((((1");
+			}).to.throw();
 		});
 	});
 });

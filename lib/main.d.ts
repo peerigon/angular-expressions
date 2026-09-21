@@ -49,6 +49,7 @@ interface CompileFuncOptions extends LexerOptions {
     [x: string]: any;
   };
   cacheSize?: number;
+  maxExpressionLength?: number;
 }
 
 type EvaluatorFunc = {
