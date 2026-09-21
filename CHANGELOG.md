@@ -1,3 +1,11 @@
+### 1.7.0
+
+- Set the max length of expressions to 250 characters. Raise the limit per call with `{ maxExpressionLength: 750 }`. This bounds parser depth and cache memory.
+- Add `compile.withOptions(options)` to bind compile options and use a private source-keyed cache.
+- Skip the global compile cache when option identity cannot be represented (function, symbol, or object literals, and identifier callbacks).
+- Build global cache keys from the source string and own parser options only, so inherited `src` or `toJSON` cannot redirect cache identity.
+- Remove the unused `cache` compile option from TypeScript declarations.
+
 ### 1.6.0
 
 To simplify the code, we have decided to bring in some breaking changes, which should probably affect no users of this library.
