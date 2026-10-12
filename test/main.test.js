@@ -1520,6 +1520,94 @@ describe("expressions", function () {
 			).to.throw(Error, '"FilterExpression" is blocked by disabledSyntaxes');
 		});
 
+		it("should be possible to disable assignments", function () {
+			[false, true].forEach(function (csp) {
+				expect(() =>
+					compile("a = 1", {
+						csp: csp,
+						disabledSyntaxes: ["AssignmentExpression"],
+					})
+				).to.throw(
+					Error,
+					'"AssignmentExpression" is blocked by disabledSyntaxes'
+				);
+
+				expect(() =>
+					compile("a.b = 1", {
+						csp: csp,
+						disabledSyntaxes: ["AssignmentExpression"],
+					})
+				).to.throw(
+					Error,
+					'"AssignmentExpression" is blocked by disabledSyntaxes'
+				);
+
+				expect(() =>
+					compile("b; a = 1", {
+						csp: csp,
+						disabledSyntaxes: ["AssignmentExpression"],
+					})
+				).to.throw(
+					Error,
+					'"AssignmentExpression" is blocked by disabledSyntaxes'
+				);
+			});
+		});
+
+		it("should still be possible to read assignable expressions if disabledSyntaxes:AssignmentExpression", function () {
+			[false, true].forEach(function (csp) {
+				var scope = { a: { b: [{ c: 5 }] }, x: 7 };
+
+				expect(
+					compile("a", {
+						csp: csp,
+						disabledSyntaxes: ["AssignmentExpression"],
+					})(scope)
+				).to.eql(scope.a);
+
+				expect(
+					compile("a.b[0].c", {
+						csp: csp,
+						disabledSyntaxes: ["AssignmentExpression"],
+					})(scope)
+				).to.equal(5);
+
+				expect(
+					compile("this.x", {
+						csp: csp,
+						disabledSyntaxes: ["AssignmentExpression"],
+					})(scope)
+				).to.equal(7);
+
+				expect(
+					compile('a["b"]', {
+						csp: csp,
+						disabledSyntaxes: ["AssignmentExpression"],
+					})(scope)
+				).to.eql(scope.a.b);
+			});
+		});
+
+		it("should not generate a setter if disabledSyntaxes:AssignmentExpression", function () {
+			[false, true].forEach(function (csp) {
+				// No setter is generated, so calling it behaves the same way as
+				// calling the setter of a non-assignable expression like "1 + 1".
+				var scope = {};
+				expect(() =>
+					compile("a.b", {
+						csp: csp,
+						disabledSyntaxes: ["AssignmentExpression"],
+					}).assign(scope, 3)
+				).to.throw(TypeError);
+				expect(scope.a).to.equal(undefined);
+
+				// ... but the setter is still generated when it is not disabled.
+				var evaluate = compile("a.b", { csp: csp });
+				evaluate.assign(scope, 3);
+				expect(scope.a.b).to.equal(3);
+			});
+		});
+
 		it("should block if making typo for DisabledSyntaxes", function () {
 			expect(() =>
 				compile("a | b", {
