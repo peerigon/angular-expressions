@@ -1,3 +1,15 @@
+### 1.7.1
+
+Fixed disabledSyntaxes: ["AssignmentExpression"] incorrectly rejecting assignable read expressions such as a, a.b.c, or this.x.
+
+Setter generation is now skipped when AssignmentExpression or NGValueParameter is disabled, while assignments written in the source remain blocked as expected.
+
+This is now allowed :
+
+```
+compile("a.b.c", { disabledSyntaxes: ["AssignmentExpression"] });
+```
+
 ### 1.7.0
 
 - Set the max length of expressions to 250 characters. Raise the limit per call with `{ maxExpressionLength: 750 }`. This bounds parser depth and cache memory.
