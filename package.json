@@ -5,13 +5,14 @@
   "main": "./lib/main.js",
   "scripts": {
     "es-check": "es-check es5 lib/*.js",
-    "preversion": "npm run es-check && npm run lint && npm run test && npm run test:typings && npm run test:fn-generation && attw . --pack",
+    "preversion": "npm run es-check && npm run lint && npm run test && npm run test:typings && npm run test:fn-generation && npm run --silent verify-publish-size && npm run --silent verify-no-global && attw . --pack",
     "test": "mocha --expose-gc test/main.test.js -R spec",
     "test:typings": "tsd .",
-    "test:fn-generation": "./test-fn-generation.bash",
+    "test:fn-generation": "bash ./scripts/test-fn-generation.bash",
     "lint": "eslint lib test && prettier lib/*.js test/*.js lib/*.ts *.md --list-different",
     "lint:fix": "eslint --fix lib test && prettier --write lib/*.js test/*.js *.md lib/*.ts",
-    "verifypublishsize": "bash ./verifypublishsize.bash"
+    "verify-no-global": "bash ./scripts/verify-no-global.bash",
+    "verify-publish-size": "bash ./scripts/verify-publish-size.bash"
   },
   "keywords": [
     "angular",
