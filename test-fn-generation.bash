@@ -14,6 +14,12 @@ sed -i 's/\/\/ if (global.storeFnString) { global.storeFnString(fnString); }/if 
 node --expose-gc ./node_modules/.bin/mocha test/main.test.js || true
 sed -i 's/^[[:blank:]]*if (global.storeFnString) { global.storeFnString(fnString); }/\t\t\/\/ if (global.storeFnString) { global.storeFnString(fnString); }/' lib/parse.js
 
+# lib/parse.js must ship with the hook commented out: `global` does not exist in browsers.
+if ! grep -q '^[[:blank:]]*// if (global.storeFnString) { global.storeFnString(fnString); }$' lib/parse.js; then
+    echo "lib/parse.js: storeFnString hook is not commented out" >&2
+    exit 1
+fi
+
 files_array=(gen-code/*.js)
 
 test() {
